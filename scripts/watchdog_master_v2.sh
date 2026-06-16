@@ -35,6 +35,8 @@ run_and_capture "Combined Snapshot" "$BASE/scripts/watchdog_run_all_v1.sh"
 run_and_capture "Storage/NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
+run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
+
 
 LATEST_COMBINED="$(ls -t "$BASE"/reports/watchdog-combined-*.md 2>/dev/null | head -1)"
 LATEST_HA_DIFF="$(ls -t "$BASE"/reports/watchdog-diff-*.md 2>/dev/null | head -1)"
