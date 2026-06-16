@@ -22,7 +22,7 @@ STAMP="$(date +'%Y-%m-%d_%H-%M-%S')"
 OUT="$BASE/snapshots/main-server/$STAMP"
 REPORT="$BASE/reports/health-report-$STAMP.md"
 
-mkdir -p "$OUT"/{logs-current,logs-tail,container-inspect}
+mkdir -p "$OUT"/{logs-current,logs-tail}
 
 echo "# AI Watchdog Health Report v1.1" > "$REPORT"
 echo "" >> "$REPORT"
@@ -80,9 +80,15 @@ section "Docker Containers"
   echo '```'
 } >> "$REPORT"
 
+: > "$OUT/container-summary.txt"
 while read -r c; do
   [ -z "$c" ] && continue
-  docker inspect "$c" > "$OUT/container-inspect/$c.json" 2>/dev/null || true
+
+  # Safe docker inspect summary.
+  # Do NOT save raw docker inspect JSON because it can include environment secrets.
+  docker inspect \
+    --format '{{.Name}} Image={{.Config.Image}} Running={{.State.Running}} RestartPolicy={{.HostConfig.RestartPolicy.Name}} StartedAt={{.State.StartedAt}} Health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' \
+    "$c" >> "$OUT/container-summary.txt" 2>/dev/null || true
 done < "$OUT/container-names.txt"
 
 docker ps --format '{{.Names}} {{.Status}}' | grep -Ei 'unhealthy|restarting|exited|dead' > "$OUT/docker-problems.txt" || true
