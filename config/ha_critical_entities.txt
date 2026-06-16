@@ -27,3 +27,9 @@ media_player.voice_living_room_living_room_music
 media_player.voice_living_room_living_room_reply
 media_player.voice_bathroom_2
 media_player.voice_bathroom
+
+# Home Assistant backup status
+sensor.backup_backup_manager_state
+sensor.backup_last_successful_automatic_backup
+sensor.backup_last_attempted_automatic_backup
+sensor.backup_next_scheduled_automatic_backup

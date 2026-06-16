@@ -80,6 +80,34 @@ while read -r entity; do
   esac
 done < "$CRITICAL_FILE"
 
+
+# HA backup freshness check
+BACKUP_STATUS="$OUT/ha-backup-status.txt"
+: > "$BACKUP_STATUS"
+
+backup_manager_state="$(jq -r '.[] | select(.entity_id=="sensor.backup_backup_manager_state") | .state // "missing"' "$OUT/ha-states.json")"
+last_success="$(jq -r '.[] | select(.entity_id=="sensor.backup_last_successful_automatic_backup") | .state // "missing"' "$OUT/ha-states.json")"
+last_attempt="$(jq -r '.[] | select(.entity_id=="sensor.backup_last_attempted_automatic_backup") | .state // "missing"' "$OUT/ha-states.json")"
+next_backup="$(jq -r '.[] | select(.entity_id=="sensor.backup_next_scheduled_automatic_backup") | .state // "missing"' "$OUT/ha-states.json")"
+
+echo "Backup manager state: $backup_manager_state" >> "$BACKUP_STATUS"
+echo "Last successful automatic backup: $last_success" >> "$BACKUP_STATUS"
+echo "Last attempted automatic backup: $last_attempt" >> "$BACKUP_STATUS"
+echo "Next scheduled automatic backup: $next_backup" >> "$BACKUP_STATUS"
+
+if [ "$last_success" = "missing" ] || [ "$last_success" = "unknown" ] || [ "$last_success" = "unavailable" ]; then
+  echo "sensor.backup_last_successful_automatic_backup  $last_success" >> "$CRITICAL_BAD"
+else
+  last_success_epoch="$(date -d "$last_success" +%s 2>/dev/null || echo 0)"
+  now_epoch="$(date +%s)"
+  backup_age_hours=$(( (now_epoch - last_success_epoch) / 3600 ))
+  echo "Last successful backup age hours: $backup_age_hours" >> "$BACKUP_STATUS"
+
+  if [ "$backup_age_hours" -gt 48 ]; then
+    echo "sensor.backup_last_successful_automatic_backup  stale-${backup_age_hours}h" >> "$CRITICAL_BAD"
+  fi
+fi
+
 grep -Ei "error|failed|exception|traceback|warning|deprecated|repair|unavailable" "$OUT/ha-error-log.txt" | tail -100 > "$OUT/ha-error-hints.txt" || true
 
 echo "# Home Assistant Snapshot Report v1.2" > "$REPORT"
@@ -137,6 +165,18 @@ echo "## Unknown by Domain" >> "$REPORT"
 echo '```' >> "$REPORT"
 cat "$OUT/unknown-by-domain.txt" >> "$REPORT"
 echo '```' >> "$REPORT"
+echo "" >> "$REPORT"
+
+
+echo "## HA Backup Status" >> "$REPORT"
+echo "" >> "$REPORT"
+if [ -s "$BACKUP_STATUS" ]; then
+  echo '```' >> "$REPORT"
+  cat "$BACKUP_STATUS" >> "$REPORT"
+  echo '```' >> "$REPORT"
+else
+  echo "No HA backup status collected." >> "$REPORT"
+fi
 echo "" >> "$REPORT"
 
 echo "## Recent HA Error Log Hints" >> "$REPORT"
