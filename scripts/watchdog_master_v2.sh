@@ -71,5 +71,12 @@ if [ -f "$LATEST_SERVER_DIFF" ]; then
   echo "" >> "$REPORT"
 fi
 
+echo "## Retention Cleanup" >> "$REPORT"
+echo "" >> "$REPORT"
+echo '```' >> "$REPORT"
+WATCHDOG_RETENTION_DELETE=1 "$BASE/scripts/watchdog_retention_cleanup.sh" >> "$REPORT" 2>&1 || true
+echo '```' >> "$REPORT"
+echo "" >> "$REPORT"
+
 echo "Done."
 echo "Master report saved to: $REPORT"
