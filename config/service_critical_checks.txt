@@ -1,0 +1,11 @@
+# name|url|good_codes
+Node-RED|http://10.0.0.35:1880|200
+Frigate|http://10.0.0.35:5000|200
+Frigate Stats|http://10.0.0.35:5000/api/stats|200
+Ollama|http://10.0.0.35:11434/api/tags|200
+Qdrant Collections|http://10.0.0.35:6333/collections|200
+SearXNG|http://10.0.0.35:8181|200
+Local MCP Agent|http://10.0.0.35:3997|200,404
+Memory Router|http://10.0.0.35:3999|200,404
+Parakeet STT|http://10.0.0.35:10301/healthcheck|200
+Open WebUI|http://10.0.0.35:3000|200

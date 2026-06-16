@@ -1,0 +1,29 @@
+# Core lights
+switch.living_room_light
+light.kitchen_light
+light.island_light
+switch.dining_light
+light.dining_room_light
+switch.bedroom_light
+switch.bathroom_light
+switch.bathroom_2_light
+light.bedroom_2_light
+
+# Kitchen blinds
+cover.kitchen_blind_left
+cover.kitchen_blind_middle
+cover.kitchen_blind_right
+
+# Climate
+climate.cielo_thermostat
+
+# Locks
+# Replace this if the entity ID is different
+lock.front_door
+lock.back_door_lock
+
+# Voice PE players used by Node-RED
+media_player.voice_living_room_living_room_music
+media_player.voice_living_room_living_room_reply
+media_player.voice_bathroom_2
+media_player.voice_bathroom

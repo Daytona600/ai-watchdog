@@ -1,0 +1,14 @@
+# Secrets
+config/ha_token.env
+*.token
+*.secret
+.env
+
+# Generated watchdog output
+logs/
+reports/
+snapshots/
+
+# Local/temp
+*.tmp
+*.bak
