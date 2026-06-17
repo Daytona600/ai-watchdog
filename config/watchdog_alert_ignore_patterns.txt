@@ -1,0 +1,6 @@
+# Expected: RTX 4070 SUPER is intentionally shared by Parakeet STT, Ollama, Frigate, ffmpeg, and Faster-Whisper.
+GPU 1 .*RTX 4070 SUPER.*VRAM is [0-9]+% used
+
+# Old/stale storage false positives from before HA backup checks moved to HA sensors.
+primary-ha-backup has no HA backup archive found
+secondary-ha-backup has no HA backup archive found

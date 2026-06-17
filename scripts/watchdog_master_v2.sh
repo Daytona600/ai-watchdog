@@ -32,7 +32,7 @@ run_and_capture() {
 }
 
 run_and_capture "Combined Snapshot" "$BASE/scripts/watchdog_run_all_v1.sh"
-run_and_capture "Storage/NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
+run_and_capture "Storage-NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
