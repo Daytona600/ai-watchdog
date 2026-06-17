@@ -245,6 +245,7 @@ html_doc = f"""<!doctype html>
       <a href="dashboard.json">Dashboard JSON</a>
       <a href="alert.json">Alert JSON</a>
       <a href="watchdog-heartbeat.json">Heartbeat JSON</a>
+      <a href="dependencies.html">Service dependency map</a>
       <a href="runbooks/index.html">Recovery runbooks</a>
       <a href="action-hints.json">Action hints JSON</a>
     </div>

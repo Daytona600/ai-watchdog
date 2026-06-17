@@ -1,0 +1,28 @@
+# name<TAB>type<TAB>target
+# type: container, http, path, systemd-user-timer, git-clean, command
+
+ai-watchdog-web	systemd-user-timer	ai-watchdog-heartbeat.timer
+AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer
+AI Watchdog Master	systemd-user-timer	ai-watchdog.timer
+
+Docker	command	docker ps
+Home Assistant API	http	http://10.0.0.30:8123/api/
+Frigate API	http	http://10.0.0.35:5000/api/stats
+Node-RED	container	nodered
+Ollama	container	ollama
+Qdrant	container	qdrant
+Piper Mary	container	wyoming-piper-mary
+Piper David	container	wyoming-piper-david
+Faster Whisper	container	faster-whisper-gpu
+Parakeet STT	container	parakeet-stt
+Music Assistant	container	music-assistant
+MQTT	container	mosquitto
+Caddy HA proxy	container	caddy-ha
+AdGuard DNS	container	adguardhome
+GitHub Repo	git-clean	/home/davids/ai-watchdog
+NAS Mounts	path	/mnt/frigate_nas
+Watchdog Config	path	/home/davids/ai-watchdog/config
+driveway camera	http	http://10.0.0.35:5000/api/driveway/latest.jpg?h=100
+backdoor camera	http	http://10.0.0.35:5000/api/backdoor/latest.jpg?h=100
+kitchen camera	http	http://10.0.0.35:5000/api/kitchen/latest.jpg?h=100
+front_door camera	http	http://10.0.0.35:5000/api/front_door/latest.jpg?h=100

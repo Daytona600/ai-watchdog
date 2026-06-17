@@ -1,0 +1,45 @@
+# service<TAB>depends_on<TAB>why
+
+Dashboard	ai-watchdog-web	Serves public watchdog files on port 8098
+Dashboard	Caddy HA proxy	Publishes dashboard through https://ha.magnumz.com/watchdog/
+Dashboard	AdGuard DNS	Local DNS rewrite for ha.magnumz.com to 10.0.0.35
+Dashboard	AI Watchdog Master	Generates latest report/dashboard files
+Dashboard	AI Watchdog Heartbeat	Refreshes heartbeat and dashboard state
+
+AI Watchdog Master	Docker	Reads container status and logs
+AI Watchdog Master	Home Assistant API	Reads HA state and backup sensors
+AI Watchdog Master	Frigate API	Reads camera/storage health
+AI Watchdog Master	Node-RED	Exports and validates live flows
+AI Watchdog Master	GitHub Repo	Validates code/config is pushed
+AI Watchdog Master	NAS Mounts	Validates storage and Frigate recording paths
+
+Node-RED	Home Assistant API	Sends actions and reads HA state
+Node-RED	Ollama	LLM fallback/classification/planning
+Node-RED	Qdrant	Memory and hint storage
+Node-RED	Piper Mary	TTS voice output
+Node-RED	Piper David	TTS voice output
+Node-RED	Faster Whisper	STT path
+Node-RED	Parakeet STT	Local satellite STT path
+Node-RED	Music Assistant	Music playback/search
+Node-RED	Frigate	Camera/security state and events
+
+Voice Assistant	Home Assistant API	Assist pipeline and entity control
+Voice Assistant	Node-RED	Voice routing and intent bridge
+Voice Assistant	Faster Whisper	STT for HA voice devices
+Voice Assistant	Parakeet STT	STT for local satellites
+Voice Assistant	Piper Mary	Mary/Shaun TTS voice
+Voice Assistant	Piper David	David technical TTS voice
+Voice Assistant	Music Assistant	Room music playback
+Voice Assistant	MQTT	Messaging/events
+
+Frigate	Frigate API	Main Frigate service
+Frigate	NAS Mounts	Recording storage
+Frigate	driveway camera	Expected active camera
+Frigate	backdoor camera	Expected active camera
+Frigate	kitchen camera	Expected active camera
+Frigate	front_door camera	Expected active camera
+
+Backup Validation	GitHub Repo	Checks committed/pushed state
+Backup Validation	Home Assistant API	Checks HA backup sensors
+Backup Validation	Node-RED	Exports sanitized live flow
+Backup Validation	Watchdog Config	Builds safe config tarball
