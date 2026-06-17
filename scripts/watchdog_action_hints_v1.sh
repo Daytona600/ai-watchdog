@@ -120,8 +120,15 @@ md.append(f"Updated: {updated}")
 md.append(f"Master report: `{report_path}`")
 md.append("")
 
-if not matches:
-    md.append("No action hints matched current watchdog problems.")
+if not deduped:
+    md.append("No current watchdog problems found.")
+elif not matches:
+    md.append("Watchdog problems were found, but no action hints matched them yet.")
+    md.append("")
+    md.append("## Problems without hints")
+    md.append("")
+    for problem in deduped:
+        md.append(f"- {problem}")
 else:
     for item in matches:
         md.append(f"## {item['problem']}")
