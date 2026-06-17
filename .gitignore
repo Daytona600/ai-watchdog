@@ -13,3 +13,4 @@ snapshots/
 *.tmp
 *.bak
 public/
+backup-exports/
