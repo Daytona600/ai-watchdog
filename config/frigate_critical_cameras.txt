@@ -1,0 +1,7 @@
+# Expected Frigate cameras
+# solar_shed removed/disabled due unreliable Reolink wireless camera
+
+driveway
+backdoor
+kitchen
+front_door
