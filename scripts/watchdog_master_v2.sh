@@ -37,6 +37,7 @@ run_and_capture "Node-RED Snapshot" "$BASE/scripts/watchdog_nodered_v1.sh"
 run_and_capture "Frigate Camera Snapshot" "$BASE/scripts/watchdog_frigate_v1.sh"
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
+run_and_capture "Action Hints" "$BASE/scripts/watchdog_action_hints_v1.sh" "$REPORT"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
 
 

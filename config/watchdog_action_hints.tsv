@@ -1,0 +1,16 @@
+# pattern<TAB>hint
+# Keep patterns simple. The script does case-insensitive matching.
+
+lock.back_door_lock	Back door lock is unavailable. Check batteries first, then bolt/strike-plate alignment, then wireless mesh/radio route.
+lock.front_door	Front door lock is unavailable. Check batteries first, then bolt alignment, then wireless mesh/radio route.
+camera.solar_shed	Solar shed camera is unavailable. This Reolink wireless camera is intentionally unreliable/disabled; only re-add if it is restored.
+Frigate camera missing	Frigate expected camera is missing. Check Frigate config, disabled cameras, and whether the camera should still be in config/frigate_critical_cameras.txt.
+Frigate latest snapshot failed	Frigate snapshot failed. Check camera stream, go2rtc stream name, and whether the camera is reachable.
+Node-RED critical tab term missing	Node-RED flow tab is missing. Check whether a tab was renamed or accidentally deleted.
+Current error hints found in Docker logs	Check current-error-lines.txt in the latest main-server snapshot. If only known noisy devices appear, add targeted ignore patterns; otherwise fix the noisy service.
+VRAM is	High GPU VRAM. Check nvidia-smi/pids; expected Parakeet/Ollama/Frigate use can be ignored, but unknown large processes should be investigated.
+root disk	Root disk is high. Check Docker build cache, ComfyUI layer size, old images, and logs before doing broad prune.
+NAS	NAS issue. Check ping, mount status, df usage, and whether the expected NAS path is mounted.
+HA backup	HA backup issue. Check HA backup sensors first; HAOS writes backups directly, so main-server NAS file scans may not apply.
+unavailable	HA entity unavailable. Check device power/battery first, then integration status, then network/mesh route.
+unknown	HA entity unknown. Check integration state, template sensors, and whether the entity was renamed.
