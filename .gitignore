@@ -12,3 +12,4 @@ snapshots/
 # Local/temp
 *.tmp
 *.bak
+public/
