@@ -1,12 +1,12 @@
 # name<TAB>type<TAB>target
 # type: container, http, path, systemd-user-timer, git-clean, command
 
-ai-watchdog-web	systemd-user-timer	ai-watchdog-heartbeat.timer
+ai-watchdog-web	http	http://127.0.0.1:8098/dashboard.html
 AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer
 AI Watchdog Master	systemd-user-timer	ai-watchdog.timer
 
 Docker	command	docker ps
-Home Assistant API	http	http://10.0.0.30:8123/api/
+Home Assistant API	command	bash -lc 'source /home/davids/ai-watchdog/config/ha_token.env && curl -fsS -H "Authorization: Bearer $HA_TOKEN" "$HA_BASE_URL/api/" >/dev/null'
 Frigate API	http	http://10.0.0.35:5000/api/stats
 Node-RED	container	nodered
 Ollama	container	ollama
@@ -15,7 +15,6 @@ Piper Mary	container	wyoming-piper-mary
 Piper David	container	wyoming-piper-david
 Faster Whisper	container	faster-whisper-gpu
 Parakeet STT	container	parakeet-stt
-Music Assistant	container	music-assistant
 MQTT	container	mosquitto
 Caddy HA proxy	container	caddy-ha
 AdGuard DNS	container	adguardhome
@@ -26,3 +25,7 @@ driveway camera	http	http://10.0.0.35:5000/api/driveway/latest.jpg?h=100
 backdoor camera	http	http://10.0.0.35:5000/api/backdoor/latest.jpg?h=100
 kitchen camera	http	http://10.0.0.35:5000/api/kitchen/latest.jpg?h=100
 front_door camera	http	http://10.0.0.35:5000/api/front_door/latest.jpg?h=100
+Backup Validation	command	bash -lc 'ls -t /home/davids/ai-watchdog/reports/watchdog-backup-validation-*.md >/dev/null 2>&1'
+Dashboard	http	http://127.0.0.1:8098/dashboard.html
+Frigate	http	http://10.0.0.35:5000/api/stats
+Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" faster-whisper-gpu >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-mary >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-david >/dev/null 2>&1'
