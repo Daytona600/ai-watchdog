@@ -1,0 +1,28 @@
+# Current live Node-RED production tabs
+
+AI 00 - HA Entity Sync
+AI 01 - Natural Language Light Control
+AI 02 Voice Input Bridge
+AI 03 - Climate Control
+AI 04 - Speech Confirmation Gateway
+AI 05 - Media Transport Control
+AI 06 Dynamic Music Search
+AI 07 - Living Room Assist HTTP Bridge
+AI 08 - Qdrant Memory Learning
+AI 09 - Qdrant Music Hints
+AI 10 - Conversation Fallback
+AI 11 - Read Only State Answers
+
+# Supporting production/config tabs
+AI00 - Config Init
+AI06A Music Library Cache
+AI12 Blind Control
+AI13 Planner Test
+AI 14 - ThinkPad Satellite Entry
+Satellite - ThinkPad Entry
+
+# Memory/search support
+DEV 04A Memory Recall
+DEV 04B Memory Write
+SearXNG -> Ollama Web Answer
+Web Search

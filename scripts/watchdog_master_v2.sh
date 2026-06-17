@@ -33,6 +33,7 @@ run_and_capture() {
 
 run_and_capture "Combined Snapshot" "$BASE/scripts/watchdog_run_all_v1.sh"
 run_and_capture "Storage-NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
+run_and_capture "Node-RED Snapshot" "$BASE/scripts/watchdog_nodered_v1.sh"
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
@@ -42,6 +43,7 @@ LATEST_COMBINED="$(ls -t "$BASE"/reports/watchdog-combined-*.md 2>/dev/null | he
 LATEST_HA_DIFF="$(ls -t "$BASE"/reports/watchdog-diff-*.md 2>/dev/null | head -1)"
 LATEST_SERVER_DIFF="$(ls -t "$BASE"/reports/watchdog-server-diff-*.md 2>/dev/null | head -1)"
 LATEST_STORAGE="$(ls -t "$BASE"/reports/watchdog-storage-*.md 2>/dev/null | head -1)"
+LATEST_NODERED="$(ls -t "$BASE"/reports/watchdog-nodered-*.md 2>/dev/null | head -1)"
 
 echo "## Report Links" >> "$REPORT"
 echo "" >> "$REPORT"
@@ -49,6 +51,7 @@ echo "- Combined snapshot: \`${LATEST_COMBINED:-not found}\`" >> "$REPORT"
 echo "- HA diff: \`${LATEST_HA_DIFF:-not found}\`" >> "$REPORT"
 echo "- Main server diff: \`${LATEST_SERVER_DIFF:-not found}\`" >> "$REPORT"
 echo "- Storage/NAS report: \`${LATEST_STORAGE:-not found}\`" >> "$REPORT"
+echo "- Node-RED report: \`${LATEST_NODERED:-not found}\`" >> "$REPORT"
 echo "" >> "$REPORT"
 
 echo "## Final Summary" >> "$REPORT"
@@ -67,6 +70,12 @@ fi
 if [ -f "$LATEST_HA_DIFF" ]; then
   echo "### HA Changes" >> "$REPORT"
   awk '/## New Unavailable Entities/{flag=1} /^## Critical Entity Problems Latest/{print; flag=1} flag{print}' "$LATEST_HA_DIFF" | head -120 >> "$REPORT"
+  echo "" >> "$REPORT"
+fi
+
+if [ -f "$LATEST_NODERED" ]; then
+  echo "### Node-RED Attention Needed" >> "$REPORT"
+  awk '/## Attention Needed/{flag=1; next} /^## /{flag=0} flag{print}' "$LATEST_NODERED" >> "$REPORT"
   echo "" >> "$REPORT"
 fi
 
