@@ -3,6 +3,7 @@ set -u
 
 BASE="$HOME/ai-watchdog"
 HINTS_FILE="$BASE/config/watchdog_action_hints.tsv"
+IGNORE_FILE="$BASE/config/watchdog_alert_ignore_patterns.txt"
 PUBLIC="$BASE/public"
 mkdir -p "$PUBLIC"
 
@@ -25,7 +26,7 @@ EOF
   exit 0
 fi
 
-python3 - "$REPORT" "$HINTS_FILE" "$OUT_MD" "$OUT_JSON" <<'PY'
+python3 - "$REPORT" "$HINTS_FILE" "$IGNORE_FILE" "$OUT_MD" "$OUT_JSON" <<'PY'
 from pathlib import Path
 import json
 import re
@@ -34,8 +35,9 @@ from datetime import datetime
 
 report_path = Path(sys.argv[1])
 hints_path = Path(sys.argv[2])
-out_md = Path(sys.argv[3])
-out_json = Path(sys.argv[4])
+ignore_path = Path(sys.argv[3])
+out_md = Path(sys.argv[4])
+out_json = Path(sys.argv[5])
 
 report = report_path.read_text(errors="replace")
 lines = report.splitlines()
@@ -53,6 +55,24 @@ if hints_path.exists():
         hint = hint.strip()
         if pattern and hint:
             rules.append((pattern, hint))
+
+ignore_patterns = []
+if ignore_path.exists():
+    for raw in ignore_path.read_text(errors="replace").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        ignore_patterns.append(line)
+
+def ignored_problem(text: str) -> bool:
+    for pat in ignore_patterns:
+        try:
+            if re.search(pat, text, flags=re.IGNORECASE):
+                return True
+        except re.error:
+            if pat.lower() in text.lower():
+                return True
+    return False
 
 # Pull likely problem lines from the report.
 problem_lines = []
@@ -92,6 +112,8 @@ for line in lines:
 seen = set()
 deduped = []
 for line in problem_lines:
+    if ignored_problem(line):
+        continue
     key = line.lower()
     if key not in seen:
         seen.add(key)
