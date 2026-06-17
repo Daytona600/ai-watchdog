@@ -39,6 +39,7 @@ run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
 run_and_capture "Action Hints" "$BASE/scripts/watchdog_action_hints_v1.sh" "$REPORT"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
+run_and_capture "Dashboard Page" "$BASE/scripts/watchdog_dashboard_v1.sh"
 
 
 LATEST_COMBINED="$(ls -t "$BASE"/reports/watchdog-combined-*.md 2>/dev/null | head -1)"

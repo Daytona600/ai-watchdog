@@ -123,3 +123,9 @@ PY
       "$HA_BASE_URL/api/services/persistent_notification/dismiss" >/dev/null || true
   fi
 fi
+
+# Refresh dashboard page after heartbeat JSON changes.
+if [ -x "$BASE/scripts/watchdog_dashboard_v1.sh" ]; then
+  "$BASE/scripts/watchdog_dashboard_v1.sh" >/dev/null 2>&1 || true
+fi
+
