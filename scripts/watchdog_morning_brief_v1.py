@@ -79,6 +79,7 @@ updates = read_json(PUBLIC / "updates.json", {})
 history = read_json(PUBLIC / "history.json", {})
 changes = read_json(PUBLIC / "changes.json", {})
 hints = read_json(PUBLIC / "action-hints.json", {})
+drill = read_json(BASE / "state" / "watchdog-drill.json", {})
 
 latest_master = newest("watchdog-master-*.md")
 latest_updates = newest("watchdog-updates-*.md")
@@ -115,6 +116,14 @@ change_label = changes.get("label")
 git_dirty = bool(git_status())
 
 attention_items = []
+
+drill_active = bool(drill.get("active"))
+if drill_active:
+    attention_items.append(
+        "DRILL MODE active, not a real fault: "
+        + str(drill.get("message") or "watchdog drill test")
+    )
+
 
 if alert.get("attention") is True:
     attention_items.append(f"Watchdog alert active: {alert.get('message', 'unknown')}")
@@ -177,6 +186,8 @@ data = {
         "change_count": change_count,
         "change_attention_count": len(change_attention),
         "git_dirty": git_dirty,
+        "drill_active": bool(drill.get("active")),
+        "drill_message": drill.get("message", ""),
     },
     "available_updates": available_updates,
     "recent_history_count": len(recent_hist),
@@ -377,6 +388,7 @@ html_doc = f"""<!doctype html>
     <a href="updates.html">Updates</a> ·
     <a href="changes.html">Changes</a> ·
     <a href="history.html">History</a> ·
+    <a href="drill.html">Drill</a> ·
     <a href="brief.json">Brief JSON</a>
   </p>
 

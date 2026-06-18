@@ -94,6 +94,7 @@ dashboard = read_json(PUBLIC / "dashboard.json", {})
 heartbeat = read_json(PUBLIC / "watchdog-heartbeat.json", {})
 deps = read_json(PUBLIC / "dependencies.json", {})
 hints = read_json(PUBLIC / "action-hints.json", {})
+drill = read_json(BASE / "state" / "watchdog-drill.json", {})
 
 latest_master = newest("watchdog-master-*.md")
 master_text = read_text(latest_master) if latest_master else ""
@@ -112,7 +113,13 @@ record = {
     "dependency_unchecked": deps.get("summary", {}).get("unchecked"),
     "hint_count": len(hints.get("hints") or []),
     "master_attention_line_count": count_attention_lines(master_text),
+    "drill_active": bool(drill.get("active")),
+    "drill_message": drill.get("message", ""),
 }
+
+if bool(drill.get("active")):
+    record["overall_status"] = "attention"
+    record["alert_message"] = "DRILL MODE active, not a real fault: " + str(drill.get("message") or "watchdog drill test")
 
 # Avoid duplicate entries for the same master report unless status changed.
 existing = []
