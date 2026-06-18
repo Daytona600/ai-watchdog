@@ -15,3 +15,5 @@ snapshots/
 public/
 backup-exports/
 history/
+change-snapshots/
+state/
