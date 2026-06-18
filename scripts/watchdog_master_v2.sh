@@ -45,6 +45,7 @@ run_and_capture "Update Monitor" "$BASE/scripts/watchdog_update_monitor_v1.sh"
 run_and_capture "Dependency Map" "$BASE/scripts/watchdog_dependencies_v1.py"
 run_and_capture "Dashboard Page" "$BASE/scripts/watchdog_dashboard_v1.sh"
 run_and_capture "History Page" "$BASE/scripts/watchdog_history_v1.py"
+run_and_capture "Morning Brief" "$BASE/scripts/watchdog_morning_brief_v1.py"
 
 
 LATEST_COMBINED="$(ls -t "$BASE"/reports/watchdog-combined-*.md 2>/dev/null | head -1)"
@@ -55,6 +56,7 @@ LATEST_NODERED="$(ls -t "$BASE"/reports/watchdog-nodered-*.md 2>/dev/null | head
 LATEST_FRIGATE="$(ls -t "$BASE"/reports/watchdog-frigate-*.md 2>/dev/null | head -1)"
 LATEST_BACKUP_VALIDATION="$(ls -t "$BASE"/reports/watchdog-backup-validation-*.md 2>/dev/null | head -1)"
 LATEST_UPDATES="$(ls -t "$BASE"/reports/watchdog-updates-*.md 2>/dev/null | head -1)"
+LATEST_BRIEF="$(ls -t "$BASE"/reports/watchdog-brief-*.md 2>/dev/null | head -1)"
 
 echo "## Report Links" >> "$REPORT"
 echo "" >> "$REPORT"
@@ -66,6 +68,7 @@ echo "- Node-RED report: \`${LATEST_NODERED:-not found}\`" >> "$REPORT"
 echo "- Frigate camera report: \`${LATEST_FRIGATE:-not found}\`" >> "$REPORT"
 echo "- Backup validation report: \`${LATEST_BACKUP_VALIDATION:-not found}\`" >> "$REPORT"
 echo "- Update monitor report: \`${LATEST_UPDATES:-not found}\`" >> "$REPORT"
+echo "- Morning brief report: \`${LATEST_BRIEF:-not found}\`" >> "$REPORT"
 echo "" >> "$REPORT"
 
 echo "## Final Summary" >> "$REPORT"
