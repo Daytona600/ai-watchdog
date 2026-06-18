@@ -129,3 +129,8 @@ if [ -x "$BASE/scripts/watchdog_dashboard_v1.sh" ]; then
   "$BASE/scripts/watchdog_dashboard_v1.sh" >/dev/null 2>&1 || true
 fi
 
+# Refresh history page after heartbeat/dashboard state changes.
+if [ -x "$BASE/scripts/watchdog_history_v1.py" ]; then
+  "$BASE/scripts/watchdog_history_v1.py" >/dev/null 2>&1 || true
+fi
+

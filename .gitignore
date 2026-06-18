@@ -14,3 +14,4 @@ snapshots/
 *.bak
 public/
 backup-exports/
+history/
