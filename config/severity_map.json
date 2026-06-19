@@ -1,0 +1,15 @@
+{
+  "git_dirty": "info",
+  "drill_active": "info",
+
+  "ha_updates_available": "info",
+
+  "frigate_unavailable": "warning",
+  "nodered_unavailable": "warning",
+  "backup_old": "warning",
+
+  "ha_unreachable": "critical",
+  "nas_unavailable": "critical",
+  "backup_failed": "critical",
+  "heartbeat_failed": "critical"
+}
