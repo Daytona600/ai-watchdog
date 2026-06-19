@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="300">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Watchdog Dashboard</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1115;
+      --card: #171a21;
+      --text: #e8e8e8;
+      --muted: #a8b0bf;
+      --line: #2a2f3a;
+      --link: #8ab4ff;
+    }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.45;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .muted { color: var(--muted); font-size: .9rem; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #10131a;
+      border: 1px solid var(--line);
+      padding: 10px;
+      border-radius: 10px;
+      max-height: 360px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Watchdog Dashboard</h1>
+  <div class="muted">Updated: {{ updated }} · Auto-refreshes every 5 minutes</div>
+  
+  <div class="grid">
+    <div class="card">
+      <h2>Overall Status</h2>
+      <p>{{ attention }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Latest Master Report</h2>
+      <p><strong>Time:</strong> {{ latest_report_time }}<br><strong>Age:</strong> {{ latest_report_age }}</p>
+      <a href="latest.html">Open full report</a>
+    </div>
+
+    <div class="card">
+      <h2>Alert State</h2>
+      <p>{{ alert_state }}</p>
+      <a href="alert.txt">Open alert text</a>
+    </div>
+
+    <div class="card">
+      <h2>Heartbeat</h2>
+      <p>{{ heartbeat_status }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Action Hints</h2>
+      <p><strong>Matched hint groups:</strong> {{ action_hints_count }}</p>
+      <a href="action-hints.md">Open action hints markdown</a>
+    </div>
+
+    <div class="card">
+      <h2>Useful Links</h2>
+      <ul>
+        <li><a href="latest.html">Full watchdog report</a></li>
+        <li><a href="latest.md">Latest markdown summary</a></li>
+        <li><a href="latest-full.md">Latest full markdown</a></li>
+        <li><a href="dashboard.json">Dashboard JSON</a></li>
+        <li><a href="alert.json">Alert JSON</a></li>
+        <li><a href="watchdog-heartbeat.json">Heartbeat JSON</a></li>
+        <li><a href="drill.html">Safe drill mode</a></li>
+        <li><a href="brief.html">Morning brief</a></li>
+        <li><a href="changes.html">Change detection</a></li>
+        <li><a href="updates.html">Update monitor</a></li>
+        <li><a href="history.html">Watchdog history</a></li>
+        <li><a href="dependencies.html">Service dependency map</a></li>
+        <li><a href="runbooks/index.html">Recovery runbooks</a></li>
+        <li><a href="action-hints.json">Action hints JSON</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Commit Changes to Git</h2>
+      <button onclick="commitGitChanges()">Commit Changes</button>
+    </div>
+  </div>
+
+  <script>
+    async function commitGitChanges() {
+      try {
+        const response = await fetch('/api/commit-git-changes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'Commit changes from AI Watchdog Dashboard'
+          })
+        });
+
+        if (response.ok) {
+          alert('Changes committed successfully!');
+        } else {
+          const error = await response.text();
+          alert(`Error committing changes: ${error}`);
+        }
+      } catch (error) {
+        console.error('Error committing changes:', error);
+        alert('An error occurred while committing changes.');
+      }
+    }
+  </script>
+</body>
+</html>
