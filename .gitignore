@@ -17,3 +17,6 @@ backup-exports/
 history/
 change-snapshots/
 state/
+.aider*
+__pycache__/
+*.pyc
