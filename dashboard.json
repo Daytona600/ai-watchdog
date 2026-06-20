@@ -1,0 +1,16 @@
+{
+  "updated": "{{ updated }}",
+  "label": "{{ label }}",
+  "change_count": {{ change_count }},
+  "attention": [
+    "{{ attention }}"
+  ],
+  "changes": [
+    {
+      "section": "{{ section }}",
+      "change": "{{ change }}",
+      "before": "{{ before | tojson(indent=2, sort_keys=True) }}",
+      "after": "{{ after | tojson(indent=2, sort_keys=True) }}"
+    }
+  ]
+}
