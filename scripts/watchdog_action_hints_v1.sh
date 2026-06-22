@@ -132,6 +132,9 @@ for problem in deduped:
             "hints": list(dict.fromkeys(matched_hints)),
         })
 
+matched_problem_keys = {m["problem"].lower() for m in matches}
+unmatched = [p for p in deduped if p.lower() not in matched_problem_keys]
+
 status = "ok" if not matches else "hints"
 updated = datetime.now().astimezone().isoformat(timespec="seconds")
 
@@ -166,6 +169,7 @@ out_json.write_text(json.dumps({
     "updated": updated,
     "master_report": str(report_path),
     "hints": matches,
+    "unmatched": unmatched,
 }, indent=2) + "\n")
 
 print(f"Action hints written to: {out_md}")

@@ -1,2 +1,0 @@
-# Copy the local file to the server
-scp path/to/local/dashboard.html username@your-server-address:/path/to/watchdog/dashboard/

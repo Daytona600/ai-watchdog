@@ -33,13 +33,6 @@ echo "Date: $(date)" >> "$REPORT"
 echo "Host: $(hostname)" >> "$REPORT"
 echo "" >> "$REPORT"
 
-# Check for uncommitted changes in the Git repository
-if git -C "$BASE" status --porcelain | grep -q .; then
-  echo "Git repo has uncommitted changes. Please commit or stash them before running the update monitor."
-  add_attention "Git repo has uncommitted changes during update monitoring."
-  exit 1
-fi
-
 # ------------------------------------------------------------
 # Home Assistant update entities
 # ------------------------------------------------------------
@@ -50,7 +43,7 @@ echo '```' >> "$REPORT"
 if [ -f "$HA_ENV" ]; then
   source "$HA_ENV"
 
-  python3 - "$OUT/ha-updates.json" "$ATTENTION" "$UPDATE_HA_UPDATES_ARE_ATTENTION" <<'PY'
+  python3 - "$HA_BASE_URL" "$HA_TOKEN" "$OUT/ha-updates.json" "$ATTENTION" "$UPDATE_HA_UPDATES_ARE_ATTENTION" <<'PY'
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 import json
@@ -146,6 +139,51 @@ else
   add_attention "Could not list Docker containers for update inventory."
   cat "$OUT/docker-containers-error.txt" >> "$REPORT" 2>/dev/null
 fi
+
+echo '```' >> "$REPORT"
+echo "" >> "$REPORT"
+
+echo "## Docker Image Created Dates" >> "$REPORT"
+echo "" >> "$REPORT"
+echo '```' >> "$REPORT"
+
+python3 - "$OUT/docker-containers.tsv" "$OUT/docker-image-created.tsv" <<'PY'
+from pathlib import Path
+import subprocess
+import sys
+
+containers = Path(sys.argv[1])
+out = Path(sys.argv[2])
+
+images = []
+if containers.exists():
+    for line in containers.read_text(errors="replace").splitlines():
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            images.append(parts[1])
+
+images = sorted(set(images))
+rows = []
+
+for image in images:
+    try:
+        p = subprocess.run(
+            ["docker", "image", "inspect", image, "--format", "{{.Id}}\t{{.Created}}\t{{.Size}}"],
+            text=True,
+            capture_output=True,
+            timeout=10,
+        )
+        if p.returncode == 0:
+            rows.append(f"{image}\t{p.stdout.strip()}")
+        else:
+            rows.append(f"{image}\tinspect failed\t{p.stderr.strip()}")
+    except Exception as e:
+        rows.append(f"{image}\tinspect exception\t{repr(e)}")
+
+out.write_text("\n".join(rows) + ("\n" if rows else ""))
+PY
+
+cat "$OUT/docker-image-created.tsv" >> "$REPORT" 2>/dev/null
 
 echo '```' >> "$REPORT"
 echo "" >> "$REPORT"
@@ -472,32 +510,3 @@ echo "Done."
 echo "Update monitor snapshot saved to: $OUT"
 echo "Update monitor report saved to:   $REPORT"
 echo "Update page written to:           $PUBLIC/updates.html"
-
-# Insert data into the database
-python3 - <<'PY'
-import sqlite3
-from datetime import datetime
-
-DB_PATH = "/path/to/ai_watchdog.db"
-
-conn = sqlite3.connect(DB_PATH)
-cursor = conn.cursor()
-
-timestamp = datetime.now().isoformat(timespec="seconds")
-report_path = "$REPORT"
-attention_needed_path = "$ATTENTION"
-
-with open(report_path, "r") as f:
-    report = f.read()
-
-with open(attention_needed_path, "r") as f:
-    attention_needed = f.read()
-
-cursor.execute('''
-    INSERT INTO update_monitor (timestamp, report, attention_needed)
-    VALUES (?, ?, ?)
-''', (timestamp, report, attention_needed))
-
-conn.commit()
-conn.close()
-PY

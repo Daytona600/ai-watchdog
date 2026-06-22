@@ -1,8 +1,0 @@
-# Connect to your server
-sftp username@your-server-address
-
-# Navigate to the directory containing dashboard.html
-cd /path/to/watchdog/dashboard
-
-# Upload the new version of dashboard.html
-put path/to/local/dashboard.html dashboard.html

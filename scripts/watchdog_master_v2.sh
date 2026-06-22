@@ -31,6 +31,7 @@ run_and_capture() {
   echo "" >> "$REPORT"
 }
 
+run_and_capture "Git Autocommit (pre-run)" "$BASE/scripts/watchdog_git_autocommit_v1.sh pre-run"
 run_and_capture "Combined Snapshot" "$BASE/scripts/watchdog_run_all_v1.sh"
 run_and_capture "Storage-NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
 run_and_capture "Node-RED Snapshot" "$BASE/scripts/watchdog_nodered_v1.sh"
@@ -39,6 +40,7 @@ run_and_capture "Backup Validation" "$BASE/scripts/watchdog_backup_validation_v1
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
 run_and_capture "Action Hints" "$BASE/scripts/watchdog_action_hints_v1.sh" "$REPORT"
+run_and_capture "AI Diagnose" "$BASE/scripts/watchdog_ai_diagnose_v1.py"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
 run_and_capture "Publish Runbooks" "$BASE/scripts/watchdog_publish_runbooks_v1.sh"
 run_and_capture "Update Monitor" "$BASE/scripts/watchdog_update_monitor_v1.sh"
@@ -132,6 +134,8 @@ echo '```' >> "$REPORT"
 WATCHDOG_RETENTION_DELETE=1 "$BASE/scripts/watchdog_retention_cleanup.sh" >> "$REPORT" 2>&1 || true
 echo '```' >> "$REPORT"
 echo "" >> "$REPORT"
+
+"$BASE/scripts/watchdog_git_autocommit_v1.sh" post-run
 
 echo "Done."
 echo "Master report saved to: $REPORT"

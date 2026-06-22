@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/c/Users/dave/Downloads/ai-watchdog\" && ls scripts/ | head -50 && echo --- && cat README.md 2>/dev/null | head -100)",
+      "Bash(python3 -m py_compile scripts/watchdog_ai_diagnose_v1.py)",
+      "Bash(bash -n scripts/watchdog_action_hints_v1.sh)",
+      "Bash(bash -n scripts/watchdog_master_v2.sh)"
+    ]
+  }
+}
