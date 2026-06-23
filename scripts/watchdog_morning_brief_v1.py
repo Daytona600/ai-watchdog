@@ -389,6 +389,7 @@ html_doc = f"""<!doctype html>
     <a href="changes.html">Changes</a> ·
     <a href="history.html">History</a> ·
     <a href="drill.html">Drill</a> ·
+    <a href="news.html">News</a> ·
     <a href="brief.json">Brief JSON</a>
   </p>
 

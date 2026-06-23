@@ -48,6 +48,7 @@ run_and_capture "Dependency Map" "$BASE/scripts/watchdog_dependencies_v1.py"
 run_and_capture "Dashboard Page" "$BASE/scripts/watchdog_dashboard_v1.sh"
 run_and_capture "History Page" "$BASE/scripts/watchdog_history_v1.py"
 run_and_capture "Morning Brief" "$BASE/scripts/watchdog_morning_brief_v1.py"
+run_and_capture "News Brief" "$BASE/scripts/watchdog_news_brief_v1.py"
 
 
 LATEST_COMBINED="$(ls -t "$BASE"/reports/watchdog-combined-*.md 2>/dev/null | head -1)"
