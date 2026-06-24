@@ -55,7 +55,18 @@ def is_trusted(url: str, domains: list[str]) -> bool:
 
 
 def search_headlines(conf: dict, query: str, domains: list[str], max_results: int) -> tuple[list[dict], int]:
-    url = f"{conf['SEARXNG_URL']}/search?q={urllib.parse.quote(query)}&format=json&categories=news"
+    # Bake the allowlist into the query itself (site:a.com OR site:b.com ...)
+    # rather than relying on generic trending results to happen to include a
+    # wire service. The post-filter below still applies as a safety net in
+    # case the search engine ignores/loosens the site: filter.
+    if domains:
+        site_filter = " OR ".join(f"site:{d}" for d in domains)
+        query = f"({site_filter}) {query}"
+    # General search (not categories=news) — the news-vertical engines
+    # (e.g. Bing News) generally ignore site:/boolean operators, while
+    # general web engines honor them and still surface wire-service
+    # articles fine.
+    url = f"{conf['SEARXNG_URL']}/search?q={urllib.parse.quote(query)}&format=json"
     try:
         result = http_get_json(url, int(conf["WATCHDOG_NEWS_TIMEOUT_SEC"]))
     except (urllib.error.URLError, json.JSONDecodeError):
