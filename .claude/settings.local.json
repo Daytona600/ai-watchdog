@@ -206,7 +206,16 @@
       "Bash(git -C \"C:/Users/dave/Downloads/satellite-bedroom\" status)",
       "Bash(git -C \"C:/Users/dave/Downloads/satellite-living-room\" status)",
       "Bash(git -C \"C:/Users/dave/Downloads/ai-watchdog\" add .claude/settings.local.json scripts/)",
-      "Bash(git -C \"C:/Users/dave/Downloads/ai-watchdog\" log --oneline -3)"
+      "Bash(git -C \"C:/Users/dave/Downloads/ai-watchdog\" log --oneline -3)",
+      "Bash(git -C C:/Users/dave/Downloads/ai-watchdog commit -m ' *)",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids1@10.0.0.188 ' *)",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids1@10.0.0.188 \"sudo zpool import 2>&1\")",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids1@10.0.0.188 \"sudo apt-get install -y zfsutils-linux 2>&1\")",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids1@10.0.0.188 \"sudo apt-get install -y zfs-dkms 2>&1\")",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids@10.0.0.35 \"sudo apt-get install -y zfsutils-linux zfs-dkms 2>&1 | tail -20\")",
+      "Bash(ssh -i C:/Users/dave/.ssh/apex_agent_ed25519 davids@10.0.0.35 \"sudo apt-get install -y zfsutils-linux zfs-dkms 2>&1 | tail -25\")",
+      "Bash(git -C \"C:/Users/dave/Downloads/ai-watchdog\" diff --stat HEAD)",
+      "Bash(git -C \"C:/Users/dave/Downloads/ai-watchdog\" add .claude/settings.local.json)"
     ]
   }
 }
