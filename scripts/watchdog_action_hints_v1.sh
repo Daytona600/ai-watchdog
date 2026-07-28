@@ -83,6 +83,7 @@ interesting_headers = (
     "### HA Critical Entity Problems",
     "### Frigate Camera Attention Needed",
     "### Node-RED Attention Needed",
+    "### Satellites Attention Needed",
     "### Storage/NAS Attention Needed",
     "## New Unavailable Entities",
     "## Critical Entity Problems Latest",
