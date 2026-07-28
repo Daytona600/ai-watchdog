@@ -35,6 +35,7 @@ run_and_capture "Git Autocommit (pre-run)" "$BASE/scripts/watchdog_git_autocommi
 run_and_capture "Combined Snapshot" "$BASE/scripts/watchdog_run_all_v1.sh"
 run_and_capture "Storage-NAS Snapshot" "$BASE/scripts/watchdog_storage_v3.sh"
 run_and_capture "Node-RED Snapshot" "$BASE/scripts/watchdog_nodered_v1.sh"
+run_and_capture "Satellites Snapshot" "$BASE/scripts/watchdog_satellites_v1.sh"
 run_and_capture "Frigate Camera Snapshot" "$BASE/scripts/watchdog_frigate_v1.sh"
 run_and_capture "Backup Validation" "$BASE/scripts/watchdog_backup_validation_v1.sh"
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
@@ -56,6 +57,7 @@ LATEST_HA_DIFF="$(ls -t "$BASE"/reports/watchdog-diff-*.md 2>/dev/null | head -1
 LATEST_SERVER_DIFF="$(ls -t "$BASE"/reports/watchdog-server-diff-*.md 2>/dev/null | head -1)"
 LATEST_STORAGE="$(ls -t "$BASE"/reports/watchdog-storage-*.md 2>/dev/null | head -1)"
 LATEST_NODERED="$(ls -t "$BASE"/reports/watchdog-nodered-*.md 2>/dev/null | head -1)"
+LATEST_SATELLITES="$(ls -t "$BASE"/reports/watchdog-satellites-*.md 2>/dev/null | head -1)"
 LATEST_FRIGATE="$(ls -t "$BASE"/reports/watchdog-frigate-*.md 2>/dev/null | head -1)"
 LATEST_BACKUP_VALIDATION="$(ls -t "$BASE"/reports/watchdog-backup-validation-*.md 2>/dev/null | head -1)"
 LATEST_UPDATES="$(ls -t "$BASE"/reports/watchdog-updates-*.md 2>/dev/null | head -1)"
@@ -68,6 +70,7 @@ echo "- HA diff: \`${LATEST_HA_DIFF:-not found}\`" >> "$REPORT"
 echo "- Main server diff: \`${LATEST_SERVER_DIFF:-not found}\`" >> "$REPORT"
 echo "- Storage/NAS report: \`${LATEST_STORAGE:-not found}\`" >> "$REPORT"
 echo "- Node-RED report: \`${LATEST_NODERED:-not found}\`" >> "$REPORT"
+echo "- Satellites report: \`${LATEST_SATELLITES:-not found}\`" >> "$REPORT"
 echo "- Frigate camera report: \`${LATEST_FRIGATE:-not found}\`" >> "$REPORT"
 echo "- Backup validation report: \`${LATEST_BACKUP_VALIDATION:-not found}\`" >> "$REPORT"
 echo "- Update monitor report: \`${LATEST_UPDATES:-not found}\`" >> "$REPORT"
@@ -114,6 +117,12 @@ fi
 if [ -f "$LATEST_NODERED" ]; then
   echo "### Node-RED Attention Needed" >> "$REPORT"
   awk '/## Attention Needed/{flag=1; next} /^## /{flag=0} flag{print}' "$LATEST_NODERED" >> "$REPORT"
+  echo "" >> "$REPORT"
+fi
+
+if [ -f "$LATEST_SATELLITES" ]; then
+  echo "### Satellites Attention Needed" >> "$REPORT"
+  awk '/## Attention Needed/{flag=1; next} /^## /{flag=0} flag{print}' "$LATEST_SATELLITES" >> "$REPORT"
   echo "" >> "$REPORT"
 fi
 
