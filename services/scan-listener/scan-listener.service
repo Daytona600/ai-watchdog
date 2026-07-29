@@ -1,0 +1,21 @@
+[Unit]
+Description=Barcode scanner listener (inventory scan-in/scan-out)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=davids
+Group=input
+WorkingDirectory=/home/davids/scan-listener
+EnvironmentFile=/home/davids/scan-listener/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/davids/scan-listener/venv/bin/python3 /home/davids/scan-listener/scan_listener.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=scan-listener
+
+[Install]
+WantedBy=multi-user.target
