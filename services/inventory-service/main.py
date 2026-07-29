@@ -421,8 +421,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <tbody><tr><td colspan='3' class='empty'>Loading&hellip;</td></tr></tbody></table>
 
   <h2>All Items</h2>
-  <table id='items'><thead><tr><th>Item</th><th>Qty</th><th>Par</th><th>Location</th><th>Actions</th></tr></thead>
-    <tbody><tr><td colspan='5' class='empty'>Loading&hellip;</td></tr></tbody></table>
+  <table id='items'><thead><tr><th>Item</th><th>Brand</th><th>Qty</th><th>Par</th><th>Location</th><th>Actions</th></tr></thead>
+    <tbody><tr><td colspan='6' class='empty'>Loading&hellip;</td></tr></tbody></table>
 
   <h2>Add Item</h2>
   <form id='add-form' onsubmit='addItem(event)'>
@@ -488,6 +488,7 @@ function renderShopping(shop) {
 function renderItemRow(i) {
   return `<tr data-id='${i.id}'>
     <td>${escapeHtml(i.name)}</td>
+    <td>${escapeHtml(i.brand || '')}</td>
     <td>${i.quantity}</td>
     <td>${i.par_level}</td>
     <td>${escapeHtml(i.location || '')}</td>
@@ -504,7 +505,7 @@ function renderItems(items) {
   const itemsBody = document.querySelector('#items tbody');
   itemsBody.innerHTML = items.length
     ? items.map(i => renderItemRow(i)).join('')
-    : `<tr><td colspan='5' class='empty'>No items yet</td></tr>`;
+    : `<tr><td colspan='6' class='empty'>No items yet</td></tr>`;
 }
 
 function editRow(id) {
@@ -514,6 +515,7 @@ function editRow(id) {
   const tr = document.querySelector(`tr[data-id='${id}']`);
   tr.innerHTML = `
     <td class='edit-cell'><input id='e-name-${id}' value='${escapeHtml(item.name)}'></td>
+    <td class='edit-cell'><input id='e-brand-${id}' value='${escapeHtml(item.brand || '')}'></td>
     <td class='edit-cell'><input id='e-qty-${id}' type='number' step='any' value='${item.quantity}'></td>
     <td class='edit-cell'><input id='e-par-${id}' type='number' step='any' value='${item.par_level}'></td>
     <td class='edit-cell'><input id='e-loc-${id}' value='${escapeHtml(item.location || '')}'></td>
@@ -530,6 +532,7 @@ function cancelEdit() {
 
 async function saveRow(id) {
   const name = document.getElementById(`e-name-${id}`).value.trim();
+  const brand = document.getElementById(`e-brand-${id}`).value.trim();
   const quantity = parseFloat(document.getElementById(`e-qty-${id}`).value);
   const par_level = parseFloat(document.getElementById(`e-par-${id}`).value);
   const location = document.getElementById(`e-loc-${id}`).value.trim();
@@ -537,7 +540,7 @@ async function saveRow(id) {
     const r = await fetch(`items/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, quantity, par_level, location }),
+      body: JSON.stringify({ name, brand, quantity, par_level, location }),
     });
     if (!r.ok) throw new Error('save failed');
     editingId = null;
