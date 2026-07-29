@@ -669,7 +669,7 @@ async function loadTrip() {
           </td>
           <td>${i.quantity} ${escapeHtml(i.unit)}</td>
           <td class='qty'>${i.deficit}</td>
-          <td><a class='walmart-link' href='${walmartSearchUrl(i)}' target='_blank' rel='noopener'>Search Walmart</a></td>
+          <td><a class='walmart-link' href='${walmartSearchUrl(i)}' target='walmart_search' rel='noopener'>Search Walmart</a></td>
         </tr>`).join('')
       : `<tr><td colspan='4' class='empty'>Nothing needed right now &mdash; you're all stocked up.</td></tr>`;
   } catch (e) {
