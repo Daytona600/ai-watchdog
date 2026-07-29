@@ -633,11 +633,12 @@ SHOPPING_TRIP_HTML = """<!DOCTYPE html>
   .qty { font-weight:bold; color:#ff6b6b; font-size:22px; }
   .location { color:#999; font-size:14px; }
   .empty { color:#888; padding:24px 0; text-align:center; font-size:18px; }
-  a.walmart-link {
+  button.walmart-link {
     display:inline-block; background:#0071ce; color:#fff; text-decoration:none;
     padding:10px 18px; border-radius:6px; font-size:16px; white-space:nowrap;
+    border:none; cursor:pointer; font-family:inherit;
   }
-  a.walmart-link:hover { background:#004f9a; }
+  button.walmart-link:hover { background:#004f9a; }
 </style>
 </head>
 <body>
@@ -657,6 +658,10 @@ function walmartSearchUrl(item) {
   return 'https://www.walmart.com/search?q=' + encodeURIComponent(query);
 }
 
+function openWalmartSearch(url) {
+  window.open(url, 'walmart_search');
+}
+
 async function loadTrip() {
   try {
     const shop = await fetch('shopping-list', { cache: 'no-store' }).then(r => r.json());
@@ -669,7 +674,7 @@ async function loadTrip() {
           </td>
           <td>${i.quantity} ${escapeHtml(i.unit)}</td>
           <td class='qty'>${i.deficit}</td>
-          <td><a class='walmart-link' href='${walmartSearchUrl(i)}' target='walmart_search' rel='noopener'>Search Walmart</a></td>
+          <td><button class='walmart-link' onclick='openWalmartSearch("${walmartSearchUrl(i)}")'>Search Walmart</button></td>
         </tr>`).join('')
       : `<tr><td colspan='4' class='empty'>Nothing needed right now &mdash; you're all stocked up.</td></tr>`;
   } catch (e) {
