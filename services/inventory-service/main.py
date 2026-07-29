@@ -398,6 +398,9 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   #controls { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
   #controls label { display:flex; flex-direction:column; gap:4px; font-size:14px; color:#999; }
   #controls select { font-size:16px; }
+  #edit-status { display:none; background:#2a3a4a; border-radius:6px; padding:10px 14px; margin-bottom:10px; align-items:center; gap:12px; }
+  #edit-status.active { display:flex; }
+  #edit-status span { color:#aad; }
   a.trip-link {
     display:inline-block; background:#0071ce; color:#fff; text-decoration:none;
     padding:8px 16px; border-radius:6px; font-size:15px; margin-bottom:16px;
@@ -416,11 +419,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     </label>
   </div>
 
-  <h2>Shopping List</h2>
-  <table id='shopping'><thead><tr><th>Item</th><th>Qty</th><th>Par</th></tr></thead>
-    <tbody><tr><td colspan='3' class='empty'>Loading&hellip;</td></tr></tbody></table>
-
   <h2>All Items</h2>
+  <div id='edit-status'></div>
   <table id='items'><thead><tr><th>Item</th><th>Brand</th><th>Qty</th><th>Par</th><th>Location</th><th>Actions</th></tr></thead>
     <tbody><tr><td colspan='6' class='empty'>Loading&hellip;</td></tr></tbody></table>
 
@@ -437,7 +437,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
 <script>
 let itemsCache = [];
-let editingId = null;
+let editingIds = new Set();
 
 const SETTINGS = {
   'scan-mode':     { selectId: 'scan-mode-select',     options: ['Scan In', 'Scan Out'] },
@@ -478,13 +478,6 @@ async function updateSetting(key, value) {
   }
 }
 
-function renderShopping(shop) {
-  const shopBody = document.querySelector('#shopping tbody');
-  shopBody.innerHTML = shop.length
-    ? shop.map(i => `<tr><td>${escapeHtml(i.name)}</td><td class='low'>${i.quantity}</td><td>${i.par_level}</td></tr>`).join('')
-    : `<tr><td colspan='3' class='empty'>Nothing low</td></tr>`;
-}
-
 function renderItemRow(i) {
   return `<tr data-id='${i.id}'>
     <td>${escapeHtml(i.name)}</td>
@@ -501,15 +494,30 @@ function renderItemRow(i) {
 
 function renderItems(items) {
   itemsCache = items;
-  if (editingId !== null) return;
+  if (editingIds.size > 0) return;
   const itemsBody = document.querySelector('#items tbody');
   itemsBody.innerHTML = items.length
     ? items.map(i => renderItemRow(i)).join('')
     : `<tr><td colspan='6' class='empty'>No items yet</td></tr>`;
 }
 
+function updateEditStatusBar() {
+  const bar = document.getElementById('edit-status');
+  if (editingIds.size === 0) {
+    bar.classList.remove('active');
+    bar.innerHTML = '';
+    return;
+  }
+  bar.classList.add('active');
+  bar.innerHTML = `<span>${editingIds.size} item${editingIds.size === 1 ? '' : 's'} being edited</span>
+    <button onclick='saveAllEdits()'>Save All</button>
+    <button class='secondary' onclick='cancelAllEdits()'>Cancel All</button>`;
+}
+
+
+
 function editRow(id) {
-  editingId = id;
+  editingIds.add(id);
   const item = itemsCache.find(i => i.id === id);
   if (!item) return;
   const tr = document.querySelector(`tr[data-id='${id}']`);
@@ -521,13 +529,21 @@ function editRow(id) {
     <td class='edit-cell'><input id='e-loc-${id}' value='${escapeHtml(item.location || '')}'></td>
     <td class='row-actions'>
       <button onclick='saveRow(${id})'>Save</button>
-      <button class='secondary' onclick='cancelEdit()'>Cancel</button>
+      <button class='secondary' onclick='cancelEdit(${id})'>Cancel</button>
     </td>`;
+  updateEditStatusBar();
 }
 
-function cancelEdit() {
-  editingId = null;
-  renderItems(itemsCache);
+function cancelEdit(id) {
+  editingIds.delete(id);
+  const item = itemsCache.find(i => i.id === id);
+  const tr = document.querySelector(`tr[data-id='${id}']`);
+  if (item && tr) tr.outerHTML = renderItemRow(item);
+  updateEditStatusBar();
+}
+
+function cancelAllEdits() {
+  for (const id of Array.from(editingIds)) cancelEdit(id);
 }
 
 async function saveRow(id) {
@@ -543,11 +559,24 @@ async function saveRow(id) {
       body: JSON.stringify({ name, brand, quantity, par_level, location }),
     });
     if (!r.ok) throw new Error('save failed');
-    editingId = null;
-    await refresh();
+    const updated = await r.json();
+    const idx = itemsCache.findIndex(i => i.id === id);
+    if (idx !== -1) itemsCache[idx] = updated;
+    editingIds.delete(id);
+    const tr = document.querySelector(`tr[data-id='${id}']`);
+    if (tr) tr.outerHTML = renderItemRow(updated);
+    updateEditStatusBar();
+    return true;
   } catch (e) {
-    alert('Could not save changes.');
+    alert(`Could not save changes for "${name}".`);
     console.error(e);
+    return false;
+  }
+}
+
+async function saveAllEdits() {
+  for (const id of Array.from(editingIds)) {
+    await saveRow(id);
   }
 }
 
@@ -557,7 +586,14 @@ async function deleteRow(id) {
   try {
     const r = await fetch(`items/${id}`, { method: 'DELETE' });
     if (!r.ok && r.status !== 204) throw new Error('delete failed');
-    await refresh();
+    itemsCache = itemsCache.filter(i => i.id !== id);
+    editingIds.delete(id);
+    const tr = document.querySelector(`tr[data-id='${id}']`);
+    if (tr) tr.remove();
+    if (itemsCache.length === 0) {
+      document.querySelector('#items tbody').innerHTML = `<tr><td colspan='6' class='empty'>No items yet</td></tr>`;
+    }
+    updateEditStatusBar();
   } catch (e) {
     alert('Could not delete item.');
     console.error(e);
@@ -593,11 +629,7 @@ async function addItem(event) {
 
 async function refresh() {
   try {
-    const [items, shop] = await Promise.all([
-      fetch('items', { cache: 'no-store' }).then(r => r.json()),
-      fetch('shopping-list', { cache: 'no-store' }).then(r => r.json()),
-    ]);
-    renderShopping(shop);
+    const items = await fetch('items', { cache: 'no-store' }).then(r => r.json());
     renderItems(items);
   } catch (e) {
     console.error('refresh failed', e);
