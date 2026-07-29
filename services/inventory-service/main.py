@@ -398,9 +398,15 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   #controls { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
   #controls label { display:flex; flex-direction:column; gap:4px; font-size:14px; color:#999; }
   #controls select { font-size:16px; }
+  a.trip-link {
+    display:inline-block; background:#0071ce; color:#fff; text-decoration:none;
+    padding:8px 16px; border-radius:6px; font-size:15px; margin-bottom:16px;
+  }
+  a.trip-link:hover { background:#004f9a; }
 </style>
 </head>
 <body>
+  <a class='trip-link' href='shopping-trip'>Shopping Trip View &rarr;</a>
   <div id='controls'>
     <label>Scan Mode
       <select id='scan-mode-select' onchange='updateSetting("scan-mode", this.value)'></select>
@@ -608,3 +614,75 @@ document.addEventListener('visibilitychange', () => {
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard():
     return DASHBOARD_HTML
+
+
+SHOPPING_TRIP_HTML = """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping Trip</title>
+<style>
+  body { font-family: sans-serif; background:#111; color:#eee; margin:0; padding:16px; font-size:20px; }
+  h1 { margin:0 0 4px; font-size:26px; }
+  .subtitle { color:#999; font-size:15px; margin-bottom:20px; }
+  a.back { color:#8ab4ff; text-decoration:none; font-size:15px; }
+  table { width:100%; border-collapse:collapse; margin-top:16px; }
+  th, td { text-align:left; padding:12px 8px; border-bottom:1px solid #333; vertical-align:middle; }
+  th { color:#999; font-weight:normal; font-size:15px; }
+  .qty { font-weight:bold; color:#ff6b6b; font-size:22px; }
+  .location { color:#999; font-size:14px; }
+  .empty { color:#888; padding:24px 0; text-align:center; font-size:18px; }
+  a.walmart-link {
+    display:inline-block; background:#0071ce; color:#fff; text-decoration:none;
+    padding:10px 18px; border-radius:6px; font-size:16px; white-space:nowrap;
+  }
+  a.walmart-link:hover { background:#004f9a; }
+</style>
+</head>
+<body>
+  <a class='back' href='dashboard'>&larr; Back to Inventory</a>
+  <h1>Shopping Trip</h1>
+  <div class='subtitle'>Everything currently low or out of stock &mdash; tap an item to search for it on Walmart</div>
+  <table id='trip'><thead><tr><th>Item</th><th>Have</th><th>Need</th><th></th></tr></thead>
+    <tbody><tr><td colspan='4' class='empty'>Loading&hellip;</td></tr></tbody></table>
+
+<script>
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function walmartSearchUrl(item) {
+  const query = item.brand ? `${item.brand} ${item.name}` : item.name;
+  return 'https://www.walmart.com/search?q=' + encodeURIComponent(query);
+}
+
+async function loadTrip() {
+  try {
+    const shop = await fetch('shopping-list', { cache: 'no-store' }).then(r => r.json());
+    const body = document.querySelector('#trip tbody');
+    body.innerHTML = shop.length
+      ? shop.map(i => `<tr>
+          <td>
+            ${escapeHtml(i.name)}${i.brand ? ' <span class="location">(' + escapeHtml(i.brand) + ')</span>' : ''}
+            ${i.location ? `<div class='location'>${escapeHtml(i.location)}</div>` : ''}
+          </td>
+          <td>${i.quantity} ${escapeHtml(i.unit)}</td>
+          <td class='qty'>${i.deficit}</td>
+          <td><a class='walmart-link' href='${walmartSearchUrl(i)}' target='_blank' rel='noopener'>Search Walmart</a></td>
+        </tr>`).join('')
+      : `<tr><td colspan='4' class='empty'>Nothing needed right now &mdash; you're all stocked up.</td></tr>`;
+  } catch (e) {
+    console.error('load failed', e);
+  }
+}
+loadTrip();
+setInterval(loadTrip, 30000);
+</script>
+</body>
+</html>"""
+
+
+@app.get("/shopping-trip", response_class=HTMLResponse)
+async def shopping_trip():
+    return SHOPPING_TRIP_HTML
