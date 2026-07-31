@@ -68,15 +68,15 @@ if [ "${root_use:-0}" -ge "$ROOT_DISK_WARN_PERCENT" ]; then
 fi
 
 echo "Collecting Docker state..."
-docker ps > "$OUT/docker-ps.txt" 2>&1
-docker ps --format '{{json .}}' > "$OUT/docker-ps.jsonl" 2>&1
+docker ps -a > "$OUT/docker-ps.txt" 2>&1
+docker ps -a --format '{{json .}}' > "$OUT/docker-ps.jsonl" 2>&1
 docker images > "$OUT/docker-images.txt" 2>&1
-docker ps --format '{{.Names}}' > "$OUT/container-names.txt" 2>/dev/null || true
+docker ps -a --format '{{.Names}}' > "$OUT/container-names.txt" 2>/dev/null || true
 
 section "Docker Containers"
 {
   echo '```'
-  docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+  docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
   echo '```'
 } >> "$REPORT"
 
@@ -91,7 +91,7 @@ while read -r c; do
     "$c" >> "$OUT/container-summary.txt" 2>/dev/null || true
 done < "$OUT/container-names.txt"
 
-docker ps --format '{{.Names}} {{.Status}}' | grep -Ei 'unhealthy|restarting|exited|dead' > "$OUT/docker-problems.txt" || true
+docker ps -a --format '{{.Names}} {{.Status}}' | grep -Ei 'unhealthy|restarting|exited|dead' > "$OUT/docker-problems.txt" || true
 if [ -s "$OUT/docker-problems.txt" ]; then
   add_attention "One or more Docker containers may be unhealthy, restarting, exited, or dead."
 fi
@@ -234,7 +234,7 @@ wyoming-openwakeword
 wyoming-piper-mary
 wyoming-piper-david
 local-mcp-agent
-mosquitto
+cedalo_platform-mosquitto-1
 adguardhome
 caddy-ha
 memory-router
