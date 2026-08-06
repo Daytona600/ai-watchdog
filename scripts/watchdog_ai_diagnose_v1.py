@@ -106,6 +106,19 @@ def trusted_domains(conf: dict) -> list[str]:
     return [d.strip().lower() for d in raw.split(",") if d.strip()]
 
 
+def engine_bangs(conf: dict) -> str:
+    # SearXNG has no "exclude engine" request param, only per-request engine
+    # *selection* via query-embedded bangs (e.g. "!duckduckgo !brave ..."),
+    # which replaces the default engine set for that request only — no
+    # change to SearXNG's global settings. Bang tokens can't contain a
+    # literal space (the query tokenizer would split "!bing news" into two
+    # tokens), so multi-word engine names use underscores, which SearXNG's
+    # bang parser converts back to spaces before matching.
+    raw = conf.get("WATCHDOG_LLM_ENGINES", "")
+    names = [e.strip() for e in raw.split(",") if e.strip()]
+    return "".join(f"!{name.replace(' ', '_')} " for name in names)
+
+
 def is_trusted(url: str, domains: list[str]) -> bool:
     host = urllib.parse.urlparse(url).netloc.lower()
     return any(host == d or host.endswith(f".{d}") for d in domains)
@@ -116,6 +129,7 @@ def searxng_search(conf: dict, query: str) -> tuple[list[str], int]:
     if conf.get("WATCHDOG_LLM_WEB_SEARCH") != "1":
         return [], 0
     domains = trusted_domains(conf)
+    query = engine_bangs(conf) + query
     url = f"{conf['SEARXNG_URL']}/search?q={urllib.parse.quote(query)}&format=json"
     try:
         result = http_get_json(url, int(conf["WATCHDOG_LLM_TIMEOUT_SEC"]))
