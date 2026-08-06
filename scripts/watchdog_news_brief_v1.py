@@ -49,12 +49,43 @@ def trusted_domains(conf: dict) -> list[str]:
     return [d.strip().lower() for d in raw.split(",") if d.strip()]
 
 
+def engine_bangs(conf: dict, key: str) -> str:
+    # SearXNG has no "exclude engine" request param, only per-request engine
+    # *selection* via query-embedded bangs (e.g. "!duckduckgo !brave ..."),
+    # which replaces the default engine set for that request only — no
+    # change to SearXNG's global settings.
+    raw = conf.get(key, "")
+    names = [e.strip() for e in raw.split(",") if e.strip()]
+    # Bang tokens can't contain a literal space (the query tokenizer would
+    # split "!bing news" into two tokens); SearXNG's bang parser converts
+    # underscores back to spaces before matching against the engine name.
+    return "".join(f"!{name.replace(' ', '_')} " for name in names)
+
+
+def local_resources(conf: dict) -> list[dict]:
+    # Static links, not search results — a food-pantry schedule PDF's
+    # filename embeds a revision date and moves when the org updates it, so
+    # this points at the stable page that always has the current one rather
+    # than a link that will eventually 404.
+    raw = conf.get("WATCHDOG_LOCAL_RESOURCES", "")
+    items = []
+    for part in raw.split(","):
+        part = part.strip()
+        if not part or "|" not in part:
+            continue
+        label, _, url = part.partition("|")
+        items.append({"label": label.strip(), "url": url.strip()})
+    return items
+
+
 def is_trusted(url: str, domains: list[str]) -> bool:
     host = urllib.parse.urlparse(url).netloc.lower()
     return any(host == d or host.endswith(f".{d}") for d in domains)
 
 
-def search_headlines(conf: dict, query: str, domains: list[str], max_results: int) -> tuple[list[dict], int]:
+def search_headlines(
+    conf: dict, query: str, domains: list[str], max_results: int, engines_key: str
+) -> tuple[list[dict], int]:
     # Bake the allowlist into the query itself (site:a.com OR site:b.com ...)
     # rather than relying on generic trending results to happen to include a
     # wire service. The post-filter below still applies as a safety net in
@@ -62,10 +93,7 @@ def search_headlines(conf: dict, query: str, domains: list[str], max_results: in
     if domains:
         site_filter = " OR ".join(f"site:{d}" for d in domains)
         query = f"({site_filter}) {query}"
-    # General search (not categories=news) — the news-vertical engines
-    # (e.g. Bing News) generally ignore site:/boolean operators, while
-    # general web engines honor them and still surface wire-service
-    # articles fine.
+    query = engine_bangs(conf, engines_key) + query
     url = f"{conf['SEARXNG_URL']}/search?q={urllib.parse.quote(query)}&format=json"
     try:
         result = http_get_json(url, int(conf["WATCHDOG_NEWS_TIMEOUT_SEC"]))
@@ -112,15 +140,37 @@ def main() -> int:
     sections = []
     total_dropped = 0
     for query in queries:
-        headlines, dropped = search_headlines(conf, query, domains, max_per_query)
+        headlines, dropped = search_headlines(conf, query, domains, max_per_query, "WATCHDOG_NEWS_ENGINES")
         total_dropped += dropped
         sections.append({"query": query, "headlines": headlines, "dropped": dropped})
+
+    local_enabled = conf.get("WATCHDOG_LOCAL_NEWS_ENABLED") == "1"
+    local_label = conf.get("WATCHDOG_LOCAL_NEWS_LABEL", "Local")
+    local_domains = [d.strip().lower() for d in conf.get("WATCHDOG_LOCAL_NEWS_TRUSTED_DOMAINS", "").split(",") if d.strip()]
+    local_queries = [q.strip() for q in conf.get("WATCHDOG_LOCAL_NEWS_QUERIES", "").split(",") if q.strip()]
+    local_max = int(conf.get("WATCHDOG_LOCAL_NEWS_MAX_PER_QUERY", "6"))
+    resources = local_resources(conf)
+
+    local_sections = []
+    if local_enabled:
+        for query in local_queries:
+            headlines, dropped = search_headlines(
+                conf, query, local_domains, local_max, "WATCHDOG_LOCAL_NEWS_ENGINES"
+            )
+            total_dropped += dropped
+            local_sections.append({"query": query, "headlines": headlines, "dropped": dropped})
 
     data = {
         "updated": updated,
         "trusted_domains": domains,
         "sections": sections,
         "total_dropped": total_dropped,
+        "local": {
+            "label": local_label,
+            "trusted_domains": local_domains,
+            "sections": local_sections,
+            "resources": resources,
+        },
     }
     (PUBLIC / "news.json").write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
@@ -137,6 +187,27 @@ def main() -> int:
             lines.append("No trusted-source headlines found.")
         lines.append(f"_Dropped {section['dropped']} untrusted-domain result(s)._")
         lines.append("")
+
+    if local_enabled:
+        lines.append(f"# Local — {local_label}")
+        lines.append("")
+        for section in local_sections:
+            lines.append(f"## {section['query']}")
+            lines.append("")
+            if section["headlines"]:
+                for h in section["headlines"]:
+                    lines.append(f"- [{h['title']}]({h['url']}) — {h['source']}")
+            else:
+                lines.append("No trusted-source headlines found.")
+            lines.append(f"_Dropped {section['dropped']} untrusted-domain result(s)._")
+            lines.append("")
+        if resources:
+            lines.append("## Resources")
+            lines.append("")
+            for r in resources:
+                lines.append(f"- [{r['label']}]({r['url']})")
+            lines.append("")
+
     report.write_text("\n".join(lines) + "\n")
 
     section_html = ""
@@ -155,6 +226,34 @@ def main() -> int:
       <h2>{esc(section['query'])}</h2>
       {body}
       <p class="muted">Dropped {section['dropped']} untrusted-domain result(s).</p>
+    </div>"""
+
+    local_section_html = ""
+    if local_enabled:
+        for section in local_sections:
+            if section["headlines"]:
+                items = "".join(
+                    f'<li><a href="{esc(h["url"])}">{esc(h["title"])}</a>'
+                    f'<div class="muted">{esc(h["source"])} — {esc(h["content"])}</div></li>'
+                    for h in section["headlines"]
+                )
+                body = f"<ul>{items}</ul>"
+            else:
+                body = "<p>No trusted-source headlines found.</p>"
+            local_section_html += f"""
+    <div class="card">
+      <h2>{esc(section['query'])}</h2>
+      {body}
+      <p class="muted">Dropped {section['dropped']} untrusted-domain result(s).</p>
+    </div>"""
+        if resources:
+            res_items = "".join(
+                f'<li><a href="{esc(r["url"])}">{esc(r["label"])}</a></li>' for r in resources
+            )
+            local_section_html += f"""
+    <div class="card">
+      <h2>Resources</h2>
+      <ul>{res_items}</ul>
     </div>"""
 
     html_doc = f"""<!doctype html>
@@ -205,6 +304,8 @@ def main() -> int:
     <a href="news.json">News JSON</a>
   </p>
   {section_html}
+  {f'<h1 style="margin-top:28px">Local — {esc(local_label)}</h1>' if local_enabled else ''}
+  {local_section_html}
 </body>
 </html>
 """
