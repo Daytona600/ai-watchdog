@@ -101,13 +101,19 @@ for row in read_tsv(DEPENDENCIES):
     services.add(service)
     services.add(depends_on)
 
+DEFAULT_SEVERITY = "warning"
+VALID_SEVERITIES = ("info", "warning", "critical")
+
 checks = {}
 for row in read_tsv(CHECKS):
     if len(row) < 3:
         continue
     name, kind, target = row[0].strip(), row[1].strip(), row[2].strip()
+    severity = row[3].strip() if len(row) >= 4 and row[3].strip() else DEFAULT_SEVERITY
+    if severity not in VALID_SEVERITIES:
+        severity = DEFAULT_SEVERITY
     ok, detail = check_one(kind, target)
-    checks[name] = {"ok": ok, "type": kind, "target": target, "detail": detail}
+    checks[name] = {"ok": ok, "type": kind, "target": target, "detail": detail, "severity": severity}
 
 service_rows = []
 for service in sorted(services):
@@ -116,13 +122,16 @@ for service in sorted(services):
     check = checks.get(service)
     status = "unknown"
     detail = "no direct check configured"
+    severity = DEFAULT_SEVERITY
     if check:
         status = "ok" if check["ok"] else "attention"
         detail = check["detail"]
+        severity = check["severity"]
     service_rows.append({
         "service": service,
         "status": status,
         "detail": detail,
+        "severity": severity if status == "attention" else "ok",
         "depends_on": direct_deps,
         "used_by": used_by,
     })
@@ -143,9 +152,18 @@ data = {
 
 (PUBLIC / "dependencies.json").write_text(json.dumps(data, indent=2) + "\n")
 
-def badge(status):
-    cls = "ok" if status == "ok" else "bad" if status == "attention" else "unknown"
-    return f'<span class="badge {cls}">{html.escape(status.upper())}</span>'
+def badge(status, severity):
+    if status == "ok":
+        cls, label = "ok", "OK"
+    elif status == "attention" and severity == "info":
+        cls, label = "info", "INFO"
+    elif status == "attention" and severity == "critical":
+        cls, label = "bad", "CRITICAL"
+    elif status == "attention":
+        cls, label = "warn", "WARNING"
+    else:
+        cls, label = "unknown", status.upper()
+    return f'<span class="badge {cls}">{html.escape(label)}</span>'
 
 cards = []
 for row in service_rows:
@@ -168,7 +186,7 @@ for row in service_rows:
     cards.append(f"""
     <div class="card">
       <h2>{html.escape(row['service'])}</h2>
-      {badge(row['status'])}
+      {badge(row['status'], row['severity'])}
       <p class="muted">{html.escape(row['detail'])}</p>
       {deps_html}
       {used_html}
@@ -192,6 +210,8 @@ html_doc = f"""<!doctype html>
       --muted: #a8b0bf;
       --ok: #1f8f4d;
       --bad: #b83b3b;
+      --warn: #b8871f;
+      --info: #3a5f8a;
       --unknown: #6b7280;
       --line: #2a2f3a;
       --link: #8ab4ff;
@@ -235,6 +255,8 @@ html_doc = f"""<!doctype html>
     }}
     .ok {{ background: var(--ok); color: white; }}
     .bad {{ background: var(--bad); color: white; }}
+    .warn {{ background: var(--warn); color: white; }}
+    .info {{ background: var(--info); color: white; }}
     .unknown {{ background: var(--unknown); color: white; }}
   </style>
 </head>

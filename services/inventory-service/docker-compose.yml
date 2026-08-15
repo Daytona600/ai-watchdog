@@ -1,0 +1,15 @@
+services:
+  inventory-service:
+    build: .
+    container_name: inventory-service
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DB_PATH=/app/data/inventory.db
+      - OFF_BASE_URL=https://world.openfoodfacts.org
+      - "OFF_USER_AGENT=InventoryService/0.1 (contact: dstainton55@gmail.com)"
+      - HA_BASE_URL=http://10.0.0.30:8123
+      - HA_TOKEN=${HA_TOKEN}

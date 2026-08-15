@@ -1,12 +1,15 @@
-# name<TAB>type<TAB>target
+# name<TAB>type<TAB>target<TAB>severity
 # type: container, http, path, systemd-user-timer, git-clean, command
+# severity (optional 4th column): info, warning, critical. Defaults to
+# "warning" when omitted. See config/severity_map.json for the meaning of
+# each level and scripts/lib/watchdog_severity.py for how it's applied.
 
 ai-watchdog-web	http	http://127.0.0.1:8098/dashboard.html
-AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer
-AI Watchdog Master	systemd-user-timer	ai-watchdog.timer
+AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer	critical
+AI Watchdog Master	systemd-user-timer	ai-watchdog.timer	critical
 
-Docker	command	docker ps
-Home Assistant API	command	bash -lc 'source /home/davids/ai-watchdog/config/ha_token.env && curl -fsS -H "Authorization: Bearer $HA_TOKEN" "$HA_BASE_URL/api/" >/dev/null'
+Docker	command	docker ps	critical
+Home Assistant API	command	bash -lc 'source /home/davids/ai-watchdog/config/ha_token.env && curl -fsS -H "Authorization: Bearer $HA_TOKEN" "$HA_BASE_URL/api/" >/dev/null'	critical
 Frigate API	http	http://10.0.0.35:5000/api/stats
 Node-RED	container	nodered
 Ollama	container	ollama
@@ -16,10 +19,10 @@ Piper David	container	wyoming-piper-david
 Faster Whisper	container	faster-whisper-gpu
 Parakeet STT	container	parakeet-stt
 MQTT	container	mosquitto
-Caddy HA proxy	container	caddy-ha
-AdGuard DNS	container	adguardhome
-GitHub Repo	git-clean	/home/davids/ai-watchdog
-NAS Mounts	path	/mnt/frigate_nas
+Caddy HA proxy	container	caddy-ha	critical
+AdGuard DNS	container	adguardhome	critical
+GitHub Repo	git-clean	/home/davids/ai-watchdog	info
+NAS Mounts	path	/mnt/frigate_nas	critical
 Watchdog Config	path	/home/davids/ai-watchdog/config
 driveway camera	http	http://10.0.0.35:5000/api/driveway/latest.jpg?h=100
 backdoor camera	http	http://10.0.0.35:5000/api/backdoor/latest.jpg?h=100
@@ -28,4 +31,4 @@ front_door camera	http	http://10.0.0.35:5000/api/front_door/latest.jpg?h=100
 Backup Validation	command	bash -lc 'ls -t /home/davids/ai-watchdog/reports/watchdog-backup-validation-*.md >/dev/null 2>&1'
 Dashboard	http	http://127.0.0.1:8098/dashboard.html
 Frigate	http	http://10.0.0.35:5000/api/stats
-Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" faster-whisper-gpu >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-mary >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-david >/dev/null 2>&1'
+Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" faster-whisper-gpu >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-mary >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" wyoming-piper-david >/dev/null 2>&1'	critical
