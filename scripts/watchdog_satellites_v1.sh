@@ -9,8 +9,8 @@ if [ -f "$CONFIG" ]; then
   source "$CONFIG"
 fi
 
-LIVING_ROOM_IP="${LIVING_ROOM_IP:-10.0.0.214}"
-BEDROOM_LUNA_IP="${BEDROOM_LUNA_IP:-10.0.0.66}"
+LIVING_ROOM_IP="${LIVING_ROOM_IP:-10.0.0.66}"
+BEDROOM_LUNA_IP="${BEDROOM_LUNA_IP:-10.0.0.214}"
 
 STAMP="$(date +'%Y-%m-%d_%H-%M-%S')"
 OUT="$BASE/snapshots/satellites/$STAMP"

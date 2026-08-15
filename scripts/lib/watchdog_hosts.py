@@ -13,8 +13,8 @@ DEFAULTS = {
     "NAS_PRIMARY": "10.0.0.100",
     "NAS_SECONDARY": "10.0.0.6",
     "FRIGATE_HOST_IP": "10.0.0.85",
-    "BEDROOM_LUNA_IP": "10.0.0.66",
-    "LIVING_ROOM_IP": "10.0.0.214",
+    "BEDROOM_LUNA_IP": "10.0.0.214",
+    "LIVING_ROOM_IP": "10.0.0.66",
 }
 
 _ASSIGNMENT = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"?([^"\n]*)"?\s*$')
