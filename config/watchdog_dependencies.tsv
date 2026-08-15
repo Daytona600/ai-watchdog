@@ -34,7 +34,7 @@ Voice Assistant	MQTT	Messaging/events
 
 Frigate	Frigate API	Main Frigate service
 Frigate	NAS Mounts	Recording storage
-Frigate	driveway camera	Expected active camera
+Frigate	drive_front camera	Expected active camera
 Frigate	backdoor camera	Expected active camera
 Frigate	kitchen camera	Expected active camera
 Frigate	front_door camera	Expected active camera
