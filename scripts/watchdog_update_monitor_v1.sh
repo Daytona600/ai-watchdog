@@ -2,6 +2,7 @@
 set -u
 
 BASE="$HOME/ai-watchdog"
+HOSTS_CONF="$BASE/config/watchdog_known_hosts.conf"
 CONF="$BASE/config/watchdog_update_monitor.conf"
 HA_ENV="$BASE/config/ha_token.env"
 
@@ -11,6 +12,9 @@ REPORT="$BASE/reports/watchdog-updates-$STAMP.md"
 PUBLIC="$BASE/public"
 
 mkdir -p "$OUT" "$BASE/reports" "$PUBLIC"
+
+[ -f "$HOSTS_CONF" ] && source "$HOSTS_CONF"
+FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
 
 UPDATE_CHECK_APT="1"
 UPDATE_APT_MAX_LINES="80"
@@ -234,15 +238,16 @@ echo "## Frigate Version" >> "$REPORT"
 echo "" >> "$REPORT"
 echo '```' >> "$REPORT"
 
-python3 - "$OUT/frigate-version.json" <<'PY'
+python3 - "$OUT/frigate-version.json" "$FRIGATE_HOST_IP" <<'PY'
 from urllib.request import urlopen, Request
 import json
 import sys
 
 out = sys.argv[1]
+frigate_host = sys.argv[2]
 urls = [
-    "http://10.0.0.35:5000/api/version",
-    "http://10.0.0.35:5000/api/stats",
+    f"http://{frigate_host}:5000/api/version",
+    f"http://{frigate_host}:5000/api/stats",
 ]
 
 result = {"ok": False, "version": None, "source": None, "error": ""}

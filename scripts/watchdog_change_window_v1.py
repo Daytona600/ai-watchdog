@@ -12,6 +12,9 @@ import subprocess
 import sys
 
 BASE = Path.home() / "ai-watchdog"
+sys.path.insert(0, str(BASE / "scripts" / "lib"))
+import watchdog_hosts  # noqa: E402
+
 SNAP_DIR = BASE / "change-snapshots"
 STATE_DIR = BASE / "state"
 REPORT_DIR = BASE / "reports"
@@ -279,14 +282,16 @@ def capture_frigate():
         "cameras": {},
     }
 
+    frigate_host = watchdog_hosts.get("FRIGATE_HOST_IP")
+
     try:
-        version = http_json("http://10.0.0.35:5000/api/version", timeout=8)
+        version = http_json(f"http://{frigate_host}:5000/api/version", timeout=8)
         result["version"] = version if isinstance(version, str) else json.dumps(version)
     except Exception as e:
         result["error"] = f"version error: {e}"
 
     try:
-        stats = http_json("http://10.0.0.35:5000/api/stats", timeout=10)
+        stats = http_json(f"http://{frigate_host}:5000/api/stats", timeout=10)
         if isinstance(stats, dict):
             cams = stats.get("cameras", {})
             for name, data in cams.items():

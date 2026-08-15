@@ -12,7 +12,8 @@ fi
 MAIN_SERVER_IP="${MAIN_SERVER_IP:-10.0.0.35}"
 NAS_PRIMARY="${NAS_PRIMARY:-10.0.0.100}"
 NAS_SECONDARY="${NAS_SECONDARY:-10.0.0.6}"
-BEDROOM_LUNA_IP="${BEDROOM_LUNA_IP:-10.0.0.123}"
+BEDROOM_LUNA_IP="${BEDROOM_LUNA_IP:-10.0.0.66}"
+FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
 
 ROOT_DISK_WARN_PERCENT="${ROOT_DISK_WARN_PERCENT:-80}"
 NAS_WARN_PERCENT="${NAS_WARN_PERCENT:-80}"
@@ -151,7 +152,7 @@ check_url() {
 
 check_url "Node-RED" "http://$MAIN_SERVER_IP:1880"
 check_url "Open WebUI" "http://$MAIN_SERVER_IP:3000"
-check_url "Frigate" "http://$MAIN_SERVER_IP:5000"
+check_url "Frigate" "http://$FRIGATE_HOST_IP:5000"
 check_url "SearXNG" "http://$MAIN_SERVER_IP:8181"
 check_url "Qdrant Collections" "http://$MAIN_SERVER_IP:6333/collections"
 check_url "Ollama Tags" "http://$MAIN_SERVER_IP:11434/api/tags"

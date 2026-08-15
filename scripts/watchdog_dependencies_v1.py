@@ -9,6 +9,9 @@ import subprocess
 import sys
 
 BASE = Path.home() / "ai-watchdog"
+sys.path.insert(0, str(BASE / "scripts" / "lib"))
+import watchdog_hosts  # noqa: E402
+
 PUBLIC = BASE / "public"
 PUBLIC.mkdir(parents=True, exist_ok=True)
 
@@ -109,6 +112,7 @@ for row in read_tsv(CHECKS):
     if len(row) < 3:
         continue
     name, kind, target = row[0].strip(), row[1].strip(), row[2].strip()
+    target = watchdog_hosts.expand(target)
     severity = row[3].strip() if len(row) >= 4 and row[3].strip() else DEFAULT_SEVERITY
     if severity not in VALID_SEVERITIES:
         severity = DEFAULT_SEVERITY

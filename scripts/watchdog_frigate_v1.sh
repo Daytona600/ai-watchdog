@@ -2,6 +2,7 @@
 set -u
 
 BASE="$HOME/ai-watchdog"
+HOSTS_CONF="$BASE/config/watchdog_known_hosts.conf"
 CONF="$BASE/config/frigate_watchdog.conf"
 CAMERA_LIST="$BASE/config/frigate_critical_cameras.txt"
 
@@ -11,7 +12,10 @@ REPORT="$BASE/reports/watchdog-frigate-$STAMP.md"
 
 mkdir -p "$OUT" "$BASE/reports"
 
-FRIGATE_BASE_URL="http://10.0.0.35:5000"
+[ -f "$HOSTS_CONF" ] && source "$HOSTS_CONF"
+FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
+
+FRIGATE_BASE_URL="http://$FRIGATE_HOST_IP:5000"
 FRIGATE_WARN_ZERO_FPS="1"
 FRIGATE_HTTP_TIMEOUT="8"
 FRIGATE_ALLOW_ZERO_CAMERA_FPS=""
