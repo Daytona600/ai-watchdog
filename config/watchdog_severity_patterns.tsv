@@ -1,0 +1,45 @@
+# pattern<TAB>severity_key
+# Case-insensitive substring match against attention-line text, checked in
+# order top-to-bottom (first match wins) so more specific patterns are
+# listed before more general ones. severity_key must exist in
+# config/severity_map.json. Unmatched lines default to "warning" (see
+# scripts/lib/watchdog_severity.py) so an unrecognized problem is never
+# silently downgraded.
+
+# Backup / export failures (critical) before the softer "backup old" check,
+# since "no backup archive found" would otherwise also match "backup".
+safe watchdog config tarball was not created	backup_failed
+no ha backup archive found	backup_failed
+latest ha backup is	backup_old
+
+# Home Assistant reachability
+ha token env file missing	ha_unreachable
+could not read home assistant	ha_unreachable
+home assistant update available	ha_updates_available
+
+# NAS / storage reachability
+did not respond to ping	nas_unavailable
+is not a mountpoint	nas_unavailable
+has no files found under	nas_unavailable
+no mounted filesystem was found	nas_unavailable
+mount .* is critically full	nas_unavailable
+
+# Frigate
+latest frigate	frigate_unavailable
+frigate camera missing	frigate_unavailable
+frigate latest snapshot failed	frigate_unavailable
+
+# Node-RED
+node-red container is not running	nodered_unavailable
+node-red flow file	nodered_unavailable
+node-red critical tab	nodered_unavailable
+
+# Watchdog self-checks (expected noise during active development)
+git repo has uncommitted changes	git_dirty
+drill mode	drill_active
+
+# Watchdog heartbeat / scheduling
+no watchdog master report found	heartbeat_failed
+watchdog master report is	heartbeat_failed
+systemd timer is not active	heartbeat_failed
+systemd timer is not enabled	heartbeat_failed

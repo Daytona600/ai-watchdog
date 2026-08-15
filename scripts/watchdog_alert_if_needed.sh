@@ -17,6 +17,7 @@ WATCHDOG_ALERT_ON_CHANGE_ONLY="1"
 [ -f "$ALERT_CONF" ] && source "$ALERT_CONF"
 
 ALERT_TXT="$STATE_DIR/current_attention.txt"
+INFO_TXT="$STATE_DIR/current_info.txt"
 ALERT_HASH_FILE="$STATE_DIR/last_attention_hash.txt"
 PUBLIC_TXT="$PUBLIC/alert.txt"
 PUBLIC_JSON="$PUBLIC/alert.json"
@@ -28,14 +29,19 @@ if [ -z "${LATEST_MASTER:-}" ] || [ ! -f "$LATEST_MASTER" ]; then
   exit 0
 fi
 
-python3 - "$LATEST_MASTER" "$ALERT_TXT" "$IGNORE_FILE" <<'PY'
+python3 - "$BASE" "$LATEST_MASTER" "$ALERT_TXT" "$INFO_TXT" "$IGNORE_FILE" <<'PY'
 from pathlib import Path
 import re
 import sys
 
-report = Path(sys.argv[1])
-out = Path(sys.argv[2])
-ignore_file = Path(sys.argv[3])
+base = Path(sys.argv[1])
+report = Path(sys.argv[2])
+out = Path(sys.argv[3])
+info_out = Path(sys.argv[4])
+ignore_file = Path(sys.argv[5])
+
+sys.path.insert(0, str(base / "scripts" / "lib"))
+import watchdog_severity  # noqa: E402
 
 txt = report.read_text(errors="replace")
 
@@ -126,32 +132,40 @@ for raw in txt.splitlines():
 
 flush()
 
-output = []
-for title, lines in sections:
-    if not lines:
-        continue
-    output.append(f"{title}:")
-    output.extend(lines[:40])
-    output.append("")
+def build(predicate):
+    output = []
+    for title, lines in sections:
+        kept = [ln for ln in lines if predicate(watchdog_severity.classify(ln))]
+        if not kept:
+            continue
+        output.append(f"{title}:")
+        output.extend(kept[:40])
+        output.append("")
+    text = "\n".join(output).strip()
+    return text + ("\n" if text else "")
 
-final = "\n".join(output).strip()
-out.write_text(final + ("\n" if final else ""))
+out.write_text(build(watchdog_severity.is_alerting))
+info_out.write_text(build(lambda sev: sev == "info"))
 PY
 
 if [ ! -s "$ALERT_TXT" ]; then
   echo "OK: no watchdog attention items." | tee "$PUBLIC_TXT" >/dev/null
 
-  python3 - "$PUBLIC_JSON" <<'PY'
+  python3 - "$PUBLIC_JSON" "$INFO_TXT" <<'PY'
 from pathlib import Path
 import json
 import datetime
 import sys
 
+info_path = Path(sys.argv[2])
+info_lines = [ln for ln in info_path.read_text(errors="replace").splitlines()] if info_path.exists() else []
+
 Path(sys.argv[1]).write_text(json.dumps({
     "status": "ok",
     "attention": False,
     "updated": datetime.datetime.now().isoformat(timespec="seconds"),
-    "message": "No watchdog attention items."
+    "message": "No watchdog attention items.",
+    "info": info_lines
 }, indent=2))
 PY
 
@@ -177,7 +191,7 @@ LAST_HASH="$(cat "$ALERT_HASH_FILE" 2>/dev/null || true)"
 
 cat "$ALERT_TXT" > "$PUBLIC_TXT"
 
-python3 - "$PUBLIC_JSON" "$ALERT_TXT" "$LATEST_MASTER" <<'PY'
+python3 - "$PUBLIC_JSON" "$ALERT_TXT" "$LATEST_MASTER" "$INFO_TXT" <<'PY'
 from pathlib import Path
 import json
 import datetime
@@ -186,13 +200,16 @@ import sys
 json_path = Path(sys.argv[1])
 alert_path = Path(sys.argv[2])
 report_path = Path(sys.argv[3])
+info_path = Path(sys.argv[4])
+info_lines = [ln for ln in info_path.read_text(errors="replace").splitlines()] if info_path.exists() else []
 
 json_path.write_text(json.dumps({
     "status": "attention",
     "attention": True,
     "updated": datetime.datetime.now().isoformat(timespec="seconds"),
     "report": str(report_path),
-    "message": alert_path.read_text(errors="replace")
+    "message": alert_path.read_text(errors="replace"),
+    "info": info_lines
 }, indent=2))
 PY
 

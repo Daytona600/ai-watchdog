@@ -16,7 +16,6 @@ UPDATE_CHECK_APT="1"
 UPDATE_APT_MAX_LINES="80"
 UPDATE_HA_UPDATES_ARE_ATTENTION="0"
 UPDATE_APT_UPGRADES_ARE_ATTENTION="0"
-UPDATE_GIT_DIRTY_IS_ATTENTION="1"
 
 [ -f "$CONF" ] && source "$CONF"
 
@@ -326,9 +325,9 @@ cat "$OUT/git-status-branch.txt" >> "$REPORT"
 echo "" >> "$REPORT"
 cat "$OUT/git-status-short.txt" >> "$REPORT"
 
-if [ -s "$OUT/git-status-short.txt" ] && [ "$UPDATE_GIT_DIRTY_IS_ATTENTION" = "1" ]; then
-  add_attention "ai-watchdog Git repo has uncommitted changes during update monitoring."
-fi
+# Git-dirty attention is owned by watchdog_backup_validation_v1.sh (the
+# fuller git/GitHub sync check) so it is only reported once per run instead
+# of duplicated across two scripts.
 
 echo '```' >> "$REPORT"
 echo "" >> "$REPORT"
