@@ -17,6 +17,7 @@ Frigate API	http	http://${FRIGATE_HOST_IP}:5000/api/stats
 Node-RED	container	nodered
 Ollama	container	ollama
 Qdrant	container	qdrant
+Music Assistant	http	http://${HA_SERVER_IP}:8095/info
 Piper Mary	container	wyoming-piper-mary
 Piper David	container	wyoming-piper-david
 Faster Whisper	container	faster-whisper-gpu

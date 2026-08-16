@@ -98,12 +98,15 @@ heartbeat_message = heartbeat.get("message") or "No heartbeat data found."
 
 # --- Problems (warning/critical) from alert.json, each re-classified so the
 # dashboard can bucket by severity instead of treating every attention line
-# the same way. ---
+# the same way. Only parse when status is actually "attention" - the "ok"
+# branch's message is a human-readable sentence ("No watchdog attention
+# items."), not a list of problems, and would otherwise get misread as one. ---
 problems = []
-for line in parse_problem_lines(alert.get("message") or ""):
-    sev = watchdog_severity.classify(line)
-    problems.append({"text": line, "severity": sev, "hints": hints_for(line, hint_rules)})
-problems.sort(key=lambda p: -SEVERITY_ORDER.get(p["severity"], 2))
+if alert.get("status") == "attention":
+    for line in parse_problem_lines(alert.get("message") or ""):
+        sev = watchdog_severity.classify(line)
+        problems.append({"text": line, "severity": sev, "hints": hints_for(line, hint_rules)})
+    problems.sort(key=lambda p: -SEVERITY_ORDER.get(p["severity"], 2))
 
 # --- Info-only items: from alert.json's own info list plus any dependency
 # service sitting at info severity (e.g. git-dirty during active dev). ---
