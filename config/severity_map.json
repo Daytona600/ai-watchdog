@@ -7,6 +7,7 @@
   "frigate_unavailable": "warning",
   "nodered_unavailable": "warning",
   "backup_old": "warning",
+  "solar_pipeline_stale": "warning",
 
   "ha_unreachable": "critical",
   "nas_unavailable": "critical",

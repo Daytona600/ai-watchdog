@@ -18,6 +18,8 @@ FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
 ROOT_DISK_WARN_PERCENT="${ROOT_DISK_WARN_PERCENT:-80}"
 NAS_WARN_PERCENT="${NAS_WARN_PERCENT:-80}"
 GPU_VRAM_WARN_PERCENT="${GPU_VRAM_WARN_PERCENT:-90}"
+SOLAR_RAW_STALE_MINUTES_WARN="${SOLAR_RAW_STALE_MINUTES_WARN:-30}"
+SOLAR_ROLLUP_STALE_DAYS_WARN="${SOLAR_ROLLUP_STALE_DAYS_WARN:-2}"
 
 STAMP="$(date +'%Y-%m-%d_%H-%M-%S')"
 OUT="$BASE/snapshots/main-server/$STAMP"
@@ -221,6 +223,37 @@ check_nas "NAS secondary" "$NAS_SECONDARY" "/mnt/frigate_backup"
 
 section "NAS Checks"
 codeblock_file "$nas_file"
+
+echo "Checking solar data pipeline freshness..."
+solar_file="$OUT/solar-pipeline.txt"
+: > "$solar_file"
+
+# Data-freshness, not process-status: solar-collector/solar-rollups have
+# both previously sat "active (running)" for days while silently ingesting
+# or rolling up nothing (MQTT subscription and continuous-aggregate refresh
+# can both fail without the service crashing or logging anything). Checking
+# systemctl is-active here would have missed that exact incident, so this
+# checks the actual data instead.
+raw_age_min="$(docker exec postgres-main psql -U homelab -d homelab -tAc \
+  "SELECT extract(epoch from (now() - max(time)))/60 FROM solar.readings;" 2>/dev/null | tr -d '[:space:]')"
+rollup_age_days="$(docker exec postgres-main psql -U homelab -d homelab -tAc \
+  "SELECT extract(epoch from (now() - max(day)))/86400 FROM solar.readings_daily;" 2>/dev/null | tr -d '[:space:]')"
+
+{
+  echo "Raw reading age (minutes): ${raw_age_min:-query failed}"
+  echo "Rollup (readings_daily) age (days): ${rollup_age_days:-query failed}"
+} > "$solar_file"
+
+if [ -z "$raw_age_min" ] || ! awk "BEGIN{exit !($raw_age_min <= $SOLAR_RAW_STALE_MINUTES_WARN)}"; then
+  add_attention "Solar data pipeline: no new rows in solar.readings for ${raw_age_min:-an unknown number of} minutes (warning threshold ${SOLAR_RAW_STALE_MINUTES_WARN}m). Check 'systemctl status solar-collector' - it can report active while silently not ingesting."
+fi
+
+if [ -z "$rollup_age_days" ] || ! awk "BEGIN{exit !($rollup_age_days <= $SOLAR_ROLLUP_STALE_DAYS_WARN)}"; then
+  add_attention "Solar data pipeline: solar.readings_daily rollup hasn't advanced in ${rollup_age_days:-an unknown number of} days (warning threshold ${SOLAR_ROLLUP_STALE_DAYS_WARN}d). Check 'systemctl status solar-rollups' and force a continuous-aggregate refresh."
+fi
+
+section "Solar Data Pipeline"
+codeblock_file "$solar_file"
 
 echo "Collecting recent Docker logs..."
 important_containers="

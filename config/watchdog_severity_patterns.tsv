@@ -34,6 +34,10 @@ node-red container is not running	nodered_unavailable
 node-red flow file	nodered_unavailable
 node-red critical tab	nodered_unavailable
 
+# Solar data pipeline (collector/rollup can report active while silently
+# not ingesting or rolling up - see project_solar_monitoring_dashboard)
+solar data pipeline	solar_pipeline_stale
+
 # Watchdog self-checks (expected noise during active development)
 git repo has uncommitted changes	git_dirty
 drill mode	drill_active
