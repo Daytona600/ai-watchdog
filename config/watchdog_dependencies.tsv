@@ -24,6 +24,8 @@ Voice Assistant	Home Assistant API	Assist pipeline and entity control
 Voice Assistant	Node-RED	Voice routing and intent bridge
 Voice Assistant	Parakeet STT	STT for local satellites
 Voice Assistant	Kokoro TTS	David/Mary TTS voice via VOICE_OVERRIDES
+Voice Assistant	OpenWakeWord Living Room	Wake-word detection for the living room satellite (centralized 2026-08-20)
+Voice Assistant	OpenWakeWord Bedroom	Wake-word detection for the bedroom satellite (centralized 2026-08-20)
 Voice Assistant	Music Assistant	Room music playback
 Voice Assistant	MQTT	Messaging/events
 
