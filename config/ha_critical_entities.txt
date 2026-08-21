@@ -3,7 +3,6 @@ switch.living_room_light
 light.kitchen_light
 light.island_light
 switch.dining_light
-light.dining_room_light
 switch.bedroom_light
 switch.bathroom_light
 switch.bathroom_2_light
@@ -15,18 +14,17 @@ cover.kitchen_blind_middle
 cover.kitchen_blind_right
 
 # Climate
-climate.cielo_thermostat
+climate.living_room_thermostat
 
 # Locks
 # Replace this if the entity ID is different
 lock.front_door
 lock.back_door_lock
 
-# Voice PE players used by Node-RED
-media_player.voice_living_room_living_room_music
-media_player.voice_living_room_living_room_reply
-media_player.voice_bathroom_2
-media_player.voice_bathroom
+# Voice satellite / Music Assistant players used by Node-RED
+# Bathroom satellite was decommissioned - only living room and bedroom remain.
+media_player.audio_video_playback_on_front_room_satellite
+media_player.audio_video_playback_on_bedroom_voice_satellite
 
 # Home Assistant backup status
 sensor.backup_backup_manager_state
