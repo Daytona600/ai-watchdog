@@ -113,24 +113,6 @@ section "Ollama Models"
   echo '```'
 } >> "$REPORT"
 
-echo "Collecting Qdrant collections..."
-curl -s --max-time 5 "http://$MAIN_SERVER_IP:6333/collections" > "$OUT/qdrant-collections.json" || true
-
-section "Qdrant Collections"
-{
-  echo '```'
-  if command -v jq >/dev/null 2>&1; then
-    jq -r '.result.collections[]?.name' "$OUT/qdrant-collections.json" 2>/dev/null || cat "$OUT/qdrant-collections.json"
-  else
-    cat "$OUT/qdrant-collections.json"
-  fi
-  echo '```'
-} >> "$REPORT"
-
-if ! grep -q '"status":"ok"' "$OUT/qdrant-collections.json"; then
-  add_attention "Qdrant /collections check did not return expected OK status."
-fi
-
 echo "Checking service URLs..."
 services_file="$OUT/service-checks.txt"
 : > "$services_file"
@@ -363,13 +345,10 @@ important_containers="
 nodered
 frigate
 ollama
-qdrant
 searxng
 parakeet-stt
-faster-whisper-gpu
+kokoro-tts
 wyoming-openwakeword
-wyoming-piper-mary
-wyoming-piper-david
 local-mcp-agent
 cedalo_platform-mosquitto-1
 adguardhome

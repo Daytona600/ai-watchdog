@@ -15,20 +15,15 @@ AI Watchdog Master	NAS Mounts	Validates storage and Frigate recording paths
 
 Node-RED	Home Assistant API	Sends actions and reads HA state
 Node-RED	Ollama	LLM fallback/classification/planning
-Node-RED	Qdrant	Memory and hint storage
-Node-RED	Piper Mary	TTS voice output
-Node-RED	Piper David	TTS voice output
-Node-RED	Faster Whisper	STT path
+Node-RED	Kokoro TTS	TTS voice output (David/Mary via VOICE_OVERRIDES)
 Node-RED	Parakeet STT	Local satellite STT path
 Node-RED	Music Assistant	Music playback/search
 Node-RED	Frigate	Camera/security state and events
 
 Voice Assistant	Home Assistant API	Assist pipeline and entity control
 Voice Assistant	Node-RED	Voice routing and intent bridge
-Voice Assistant	Faster Whisper	STT for HA voice devices
 Voice Assistant	Parakeet STT	STT for local satellites
-Voice Assistant	Piper Mary	Mary/Shaun TTS voice
-Voice Assistant	Piper David	David technical TTS voice
+Voice Assistant	Kokoro TTS	David/Mary TTS voice via VOICE_OVERRIDES
 Voice Assistant	Music Assistant	Room music playback
 Voice Assistant	MQTT	Messaging/events
 
