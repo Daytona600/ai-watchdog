@@ -255,6 +255,109 @@ fi
 section "Solar Data Pipeline"
 codeblock_file "$solar_file"
 
+echo "Checking voice re-seed after reboot..."
+voice_file="$OUT/voice-reboot-check.txt"
+: > "$voice_file"
+
+# Node-RED's VOICE_OVERRIDES global is memory-only and gets re-seeded from
+# input_select.david_voice/mary_voice on every Node-RED start (see
+# vs_init_fn in the Home_AI_system flow, fixed 2026-08-20 to retry for ~2min
+# instead of giving up after one 2s attempt, and to record the outcome to
+# /data/voice_seed_status.json - docker logs on this instance rotate out
+# within under an hour given the conversation volume, so a check that reads
+# logs instead of this status file would be unreliable). This only matters
+# right after a reboot, so: remember the last boot time we checked, and only
+# actually verify anything when the current boot time differs from it.
+VOICE_STATE_FILE="$BASE/state/voice_reboot_watch.json"
+VOICE_SEED_STATUS_FILE="/home/davids/node-red/data/voice_seed_status.json"
+CURRENT_BOOT_EPOCH="$(date -d "$(uptime -s 2>/dev/null)" +%s 2>/dev/null || echo "")"
+
+LAST_BOOT_EPOCH=""
+if [ -f "$VOICE_STATE_FILE" ]; then
+  LAST_BOOT_EPOCH="$(python3 -c "
+import json
+try:
+    print(json.load(open('$VOICE_STATE_FILE')).get('last_known_boot_epoch',''))
+except Exception:
+    print('')
+" 2>/dev/null)"
+fi
+
+if [ -n "$CURRENT_BOOT_EPOCH" ] && [ -n "$LAST_BOOT_EPOCH" ] && [ "$CURRENT_BOOT_EPOCH" != "$LAST_BOOT_EPOCH" ]; then
+  echo "Reboot detected: last checked boot epoch $LAST_BOOT_EPOCH, current $CURRENT_BOOT_EPOCH" >> "$voice_file"
+
+  david_current=""
+  if [ -f "$HOME/ai-watchdog/config/ha_token.env" ]; then
+    source "$HOME/ai-watchdog/config/ha_token.env"
+    david_current="$(curl -fsS --max-time 8 -H "Authorization: Bearer $HA_TOKEN" "$HA_BASE_URL/api/states/input_select.david_voice" 2>/dev/null | python3 -c "
+import json, sys
+try:
+    print(json.load(sys.stdin).get('state', ''))
+except Exception:
+    print('')
+" 2>/dev/null)"
+  fi
+
+  check_result="$(python3 -c "
+import json
+from datetime import datetime, timezone
+
+status_path = '$VOICE_SEED_STATUS_FILE'
+boot_epoch = $CURRENT_BOOT_EPOCH
+david_current = '$david_current'
+
+try:
+    status = json.load(open(status_path))
+except Exception as e:
+    print(f'NO_STATUS_FILE|could not read {status_path}: {e}')
+    raise SystemExit
+
+seeded_at_raw = status.get('seeded_at', '')
+try:
+    seeded_epoch = datetime.fromisoformat(seeded_at_raw.replace('Z', '+00:00')).timestamp()
+except Exception:
+    seeded_epoch = 0
+
+david_seeded = status.get('david', '')
+fell_back = bool(status.get('fell_back_david'))
+
+if seeded_epoch < boot_epoch:
+    print(f'STALE|status file last seeded at {seeded_at_raw}, before this boot - the seed step may not have run yet or failed to write')
+elif fell_back:
+    print(f'FELL_BACK|seeded david={david_seeded} by falling back to a hardcoded default - HA was unreachable within the retry window')
+elif david_current and david_seeded != david_current:
+    print(f'MISMATCH|seeded david={david_seeded} but input_select.david_voice is now {david_current}')
+else:
+    print(f'OK|seeded david={david_seeded} at {seeded_at_raw}')
+" 2>&1)"
+
+  {
+    echo "David voice per HA:   ${david_current:-unknown}"
+    echo "Check result:         ${check_result}"
+  } >> "$voice_file"
+
+  case "$check_result" in
+    OK\|*) : ;;
+    NO_STATUS_FILE\|*) add_attention "Voice reboot check: ${check_result#*|}" ;;
+    STALE\|*) add_attention "Voice reboot check: ${check_result#*|}" ;;
+    FELL_BACK\|*) add_attention "Voice reboot check: ${check_result#*|}" ;;
+    MISMATCH\|*) add_attention "Voice reboot check: ${check_result#*|}" ;;
+    *) add_attention "Voice reboot check: could not evaluate seed status (${check_result})" ;;
+  esac
+else
+  echo "No new reboot since the last check." >> "$voice_file"
+fi
+
+if [ -n "$CURRENT_BOOT_EPOCH" ]; then
+  python3 -c "
+import json
+json.dump({'last_known_boot_epoch': '$CURRENT_BOOT_EPOCH', 'last_checked': '$(date -Iseconds)'}, open('$VOICE_STATE_FILE', 'w'), indent=2)
+" 2>/dev/null
+fi
+
+section "Voice Reboot Check"
+codeblock_file "$voice_file"
+
 echo "Collecting recent Docker logs..."
 important_containers="
 nodered

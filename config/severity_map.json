@@ -8,6 +8,7 @@
   "nodered_unavailable": "warning",
   "backup_old": "warning",
   "solar_pipeline_stale": "warning",
+  "voice_reboot_seed_failed": "warning",
 
   "ha_unreachable": "critical",
   "nas_unavailable": "critical",

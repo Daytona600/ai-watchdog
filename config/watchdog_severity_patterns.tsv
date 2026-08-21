@@ -38,6 +38,9 @@ node-red critical tab	nodered_unavailable
 # not ingesting or rolling up - see project_solar_monitoring_dashboard)
 solar data pipeline	solar_pipeline_stale
 
+# Voice re-seed after reboot (Node-RED VOICE_OVERRIDES is memory-only)
+voice reboot check	voice_reboot_seed_failed
+
 # Watchdog self-checks (expected noise during active development)
 git repo has uncommitted changes	git_dirty
 drill mode	drill_active
