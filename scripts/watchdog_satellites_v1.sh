@@ -69,9 +69,11 @@ check_satellite() {
   if ! grep -qE '^satellite\s+Up' "$out_file"; then
     add_attention "$label: 'satellite' Docker container is not Up."
   fi
-  if ! grep -qE '^openwakeword\s+Up' "$out_file"; then
-    add_attention "$label: 'openwakeword' Docker container is not Up."
-  fi
+  # Wake-word detection moved off both satellites onto centralized
+  # openwakeword-livingroom/openwakeword-bedroom containers on the main
+  # server (2026-08-21 - see watchdog_dependency_checks.tsv). Each
+  # satellite's local 'openwakeword' container is intentionally stopped,
+  # kept only for rollback, so it is expected to NOT be Up - no check here.
   if grep -qEi 'restarting|exited|dead|unhealthy' "$out_file"; then
     add_attention "$label: one or more Docker containers show restarting/exited/dead/unhealthy status."
   fi
