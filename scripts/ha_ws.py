@@ -110,6 +110,36 @@ def main():
         resp = call(ws, 2, payload)
         print(json.dumps(resp, indent=2))
 
+    elif cmd == "add_input_select_option":
+        # input_select/update requires the FULL config (name, options, icon)
+        # even to add one option - not a partial patch (same gotcha as
+        # clear_input_select_initial above). A plain input_select.set_options
+        # SERVICE call only updates the live entity state, not the stored
+        # helper config - the new option silently disappears on the next HA
+        # restart unless this websocket update is also done. Preserves
+        # "initial" if the helper already has one, so this doesn't
+        # reintroduce the stale-default-on-restart bug for helpers where
+        # that's already been cleared.
+        input_select_id = sys.argv[2]
+        new_option = sys.argv[3]
+        listing = call(ws, 1, {"type": "input_select/list"})
+        current = next(x for x in listing["result"] if x["id"] == input_select_id)
+        options = list(current["options"])
+        if new_option not in options:
+            options.append(new_option)
+        payload = {
+            "type": "input_select/update",
+            "input_select_id": input_select_id,
+            "name": current["name"],
+            "options": options,
+        }
+        if "icon" in current:
+            payload["icon"] = current["icon"]
+        if "initial" in current:
+            payload["initial"] = current["initial"]
+        resp = call(ws, 2, payload)
+        print(json.dumps(resp, indent=2))
+
     ws.close()
 
 
