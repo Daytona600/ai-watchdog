@@ -112,8 +112,8 @@ echo "## GPU Status" >> "$REPORT"
 
 echo "Checking NAS reachability..."
 {
-  echo "NAS 10.0.0.100:"
-  ping -c 2 -W 2 10.0.0.100 || true
+  echo "NAS 10.0.0.60:"
+  ping -c 2 -W 2 10.0.0.60 || true
   echo
   echo "NAS 10.0.0.6:"
   ping -c 2 -W 2 10.0.0.6 || true

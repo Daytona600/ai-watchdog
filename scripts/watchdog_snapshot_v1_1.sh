@@ -10,7 +10,7 @@ if [ -f "$CONFIG" ]; then
 fi
 
 MAIN_SERVER_IP="${MAIN_SERVER_IP:-10.0.0.35}"
-NAS_PRIMARY="${NAS_PRIMARY:-10.0.0.100}"
+NAS_PRIMARY="${NAS_PRIMARY:-10.0.0.60}"
 NAS_SECONDARY="${NAS_SECONDARY:-10.0.0.6}"
 BEDROOM_LUNA_IP="${BEDROOM_LUNA_IP:-10.0.0.214}"
 FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
@@ -340,21 +340,29 @@ section "Voice Reboot Check"
 codeblock_file "$voice_file"
 
 echo "Collecting recent Docker logs..."
+# 2026-08-27: removed memory-router (decommissioned 2026-08-25, see
+# project_z4_gpu_failure_parakeet_migration) and ai-planner (stopped,
+# superseded by direct Postgres config reads) - both produced a permanent
+# "No such container" error on every run, showing up as a false critical
+# on the dashboard. Removed frigate too - it runs on a separate host
+# (FRIGATE_HOST_IP, not local docker), so checking it via plain "docker logs"
+# always failed the same way; frigate has its own dedicated check
+# (watchdog_frigate_v1.sh) that reaches it correctly over the network.
+# wyoming-openwakeword renamed/split into per-room containers since this
+# list was written.
 important_containers="
 nodered
-frigate
 ollama
 searxng
 parakeet-stt
 kokoro-tts
-wyoming-openwakeword
+openwakeword-bedroom
+openwakeword-livingroom
 local-mcp-agent
 cedalo_platform-mosquitto-1
 adguardhome
 caddy-ha
-memory-router
 command-parser
-ai-planner
 "
 
 for c in $important_containers; do
