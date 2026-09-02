@@ -5,6 +5,7 @@ Dashboard	Caddy HA proxy	Publishes dashboard through https://ha.magnumz.com/watc
 Dashboard	AdGuard DNS	Local DNS rewrite for ha.magnumz.com to 10.0.0.35
 Dashboard	AI Watchdog Master	Generates latest report/dashboard files
 Dashboard	AI Watchdog Heartbeat	Refreshes heartbeat and dashboard state
+Dashboard	Open WebUI	Standalone Ollama chat UI, tracked but nothing else depends on it
 
 AI Watchdog Master	Docker	Reads container status and logs
 AI Watchdog Master	Home Assistant API	Reads HA state and backup sensors
@@ -19,6 +20,8 @@ Node-RED	Kokoro TTS	TTS voice output (David/Mary via VOICE_OVERRIDES)
 Node-RED	Parakeet STT	Local satellite STT path
 Node-RED	Music Assistant	Music playback/search
 Node-RED	Frigate	Camera/security state and events
+Node-RED	SearXNG	Web search/answer tool
+Node-RED	Local MCP Agent	MCP tool-calling capability
 
 Voice Assistant	Home Assistant API	Assist pipeline and entity control
 Voice Assistant	Node-RED	Voice routing and intent bridge
