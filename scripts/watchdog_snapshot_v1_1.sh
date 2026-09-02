@@ -140,7 +140,6 @@ check_url "Frigate" "http://$FRIGATE_HOST_IP:5000"
 check_url "SearXNG" "http://$MAIN_SERVER_IP:8181"
 check_url "Ollama Tags" "http://$MAIN_SERVER_IP:11434/api/tags"
 check_url "Local MCP Agent" "http://$MAIN_SERVER_IP:3997"
-check_url "Memory Router" "http://$MAIN_SERVER_IP:3999"
 
 section "Service Checks"
 codeblock_file "$services_file"
