@@ -113,37 +113,6 @@ section "Ollama Models"
   echo '```'
 } >> "$REPORT"
 
-echo "Checking service URLs..."
-services_file="$OUT/service-checks.txt"
-: > "$services_file"
-
-check_url() {
-  local name="$1"
-  local url="$2"
-  echo "$name $url" >> "$services_file"
-  code="$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "$url" || echo "000")"
-  echo "HTTP $code" >> "$services_file"
-  echo "" >> "$services_file"
-
-  case "$code" in
-    200|301|302|401|403|404)
-      ;;
-    *)
-      add_attention "$name returned HTTP $code at $url."
-      ;;
-  esac
-}
-
-check_url "Node-RED" "http://$MAIN_SERVER_IP:1880"
-check_url "Open WebUI" "http://$MAIN_SERVER_IP:3000"
-check_url "Frigate" "http://$FRIGATE_HOST_IP:5000"
-check_url "SearXNG" "http://$MAIN_SERVER_IP:8181"
-check_url "Ollama Tags" "http://$MAIN_SERVER_IP:11434/api/tags"
-check_url "Local MCP Agent" "http://$MAIN_SERVER_IP:3997"
-
-section "Service Checks"
-codeblock_file "$services_file"
-
 echo "Collecting GPU status..."
 nvidia-smi > "$OUT/nvidia-smi.txt" 2>&1 || true
 nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu --format=csv,noheader,nounits > "$OUT/gpu-summary.csv" 2>/dev/null || true

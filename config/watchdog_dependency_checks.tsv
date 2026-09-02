@@ -35,3 +35,7 @@ Backup Validation	command	bash -lc 'ls -t /home/davids/ai-watchdog/reports/watch
 Dashboard	http	http://127.0.0.1:8098/dashboard.html
 Frigate	http	http://${FRIGATE_HOST_IP}:5000/api/stats
 Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" parakeet-stt >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" kokoro-tts >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" cedalo_platform-mosquitto-1 >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" openwakeword-livingroom >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" openwakeword-bedroom >/dev/null 2>&1'	critical
+
+SearXNG	http	http://${MAIN_SERVER_IP}:8181
+Open WebUI	http	http://${MAIN_SERVER_IP}:3000
+Local MCP Agent	http	http://${MAIN_SERVER_IP}:3997
