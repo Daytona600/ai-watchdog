@@ -1,0 +1,13 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "8181:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+      - ./engines/brave_api.py:/usr/local/searxng/searx/engines/brave_api.py
+      - ./engines/google_api.py:/usr/local/searxng/searx/engines/google_api.py
+    environment:
+      - SEARXNG_BASE_URL=http://10.0.0.35:8181/
