@@ -37,6 +37,7 @@ SSH_OPTS="-i $HOME/.ssh/watchdog_satellite_ed25519 -o BatchMode=yes -o ConnectTi
 check_satellite() {
   local label="$1"
   local ip="$2"
+  local container="$3"
   local out_file="$OUT/${label// /_}.txt"
 
   echo "## $label ($ip)" >> "$REPORT"
@@ -65,9 +66,12 @@ check_satellite() {
   echo '```' >> "$REPORT"
   echo "" >> "$REPORT"
 
-  # Flag problems.
-  if ! grep -qE '^satellite\s+Up' "$out_file"; then
-    add_attention "$label: 'satellite' Docker container is not Up."
+  # Flag problems. Container name is per-room (2026-09-05 - both satellites
+  # were recreated under their proper room-specific names, e.g.
+  # living-room-satellite/bedroom-satellite, replacing a stale generic
+  # "satellite" name a prior deploy had left running).
+  if ! grep -qE "^${container}\s+Up" "$out_file"; then
+    add_attention "$label: '$container' Docker container is not Up."
   fi
   # Wake-word detection moved off both satellites onto centralized
   # openwakeword-livingroom/openwakeword-bedroom containers on the main
@@ -86,10 +90,10 @@ check_satellite() {
 }
 
 echo "Checking living room satellite..."
-check_satellite "Living Room" "$LIVING_ROOM_IP"
+check_satellite "Living Room" "$LIVING_ROOM_IP" "living-room-satellite"
 
 echo "Checking bedroom satellite..."
-check_satellite "Bedroom" "$BEDROOM_LUNA_IP"
+check_satellite "Bedroom" "$BEDROOM_LUNA_IP" "bedroom-satellite"
 
 echo "## Attention Needed" >> "$REPORT"
 echo "" >> "$REPORT"
