@@ -8,6 +8,7 @@ config/ha_token.env
 logs/
 reports/
 snapshots/
+scripts/model-eval/report.html
 
 # Local/temp
 *.tmp
