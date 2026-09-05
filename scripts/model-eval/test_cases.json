@@ -1,0 +1,746 @@
+[
+  {
+    "id": 809,
+    "text": "goodbye okay please",
+    "historical_reply": "Goodbye, David. Feel free to return anytime — I’ll be here, probably muttering to myself.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 00:24:35.496747+00"
+  },
+  {
+    "id": 810,
+    "text": "turn the living room light off",
+    "historical_reply": "Okay — living room lights off.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 00:32:41.061167+00"
+  },
+  {
+    "id": 814,
+    "text": "goodbye",
+    "historical_reply": "Have a wonderful day,",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-24 00:54:24.142676+00"
+  },
+  {
+    "id": 815,
+    "text": "the cat could not become this sister see if it says anything",
+    "historical_reply": "I'm not sure I follow — could you clarify what you're asking?",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 01:17:33.468778+00"
+  },
+  {
+    "id": 816,
+    "text": "sorry i was just mumbling to meself there to talk my way through whats wrong with the system",
+    "historical_reply": "No worries — sometimes even the best systems need a little verbal debugging. Shall I check the system health for you?",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 01:17:52.942606+00"
+  },
+  {
+    "id": 817,
+    "text": "er no thank you ive got the error reports now",
+    "historical_reply": "Alright then — if you need anything else, just give the word.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 01:18:15.290794+00"
+  },
+  {
+    "id": 818,
+    "text": "goodbye",
+    "historical_reply": "Goodbye, David. Feel free to return whenever you need assistance — I’ll be here, slightly annoyed but always ready.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 02:13:42.498448+00"
+  },
+  {
+    "id": 819,
+    "text": "good bye",
+    "historical_reply": "Goodbye again, David. I’ll be here, slightly annoyed but always ready — just don’t take too long.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 02:25:49.608629+00"
+  },
+  {
+    "id": 822,
+    "text": "how are things on the farm today",
+    "historical_reply": "Things are going well on the farm today. The sheep have been enjoying a nice sunny day, and we even had a fun game of tag with the other animals.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-24 02:59:01.554991+00"
+  },
+  {
+    "id": 824,
+    "text": "well we made the ah metal fence so that they could not get out",
+    "historical_reply": "You mean the metal fence around the sheep? That's a smart idea to keep them safe and contained.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-24 03:00:27.264546+00"
+  },
+  {
+    "id": 826,
+    "text": "the sheeper r was well behaved",
+    "historical_reply": "That's great to hear! Well done, Sheeper R.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-24 03:01:16.026207+00"
+  },
+  {
+    "id": 831,
+    "text": "goodbye",
+    "historical_reply": "Have a wonderful day!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-24 03:03:16.199957+00"
+  },
+  {
+    "id": 836,
+    "text": "how is the system running today",
+    "historical_reply": "All systems are running smoothly — no issues detected in the last 24 hours. You're welcome.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 17:09:53.06911+00"
+  },
+  {
+    "id": 837,
+    "text": "okay thank you goodbye",
+    "historical_reply": "You're welcome — have a lovely day.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 17:10:12.849897+00"
+  },
+  {
+    "id": 838,
+    "text": "do a shopping pickup thats what i feel like then i dont know if theyll do free delivery walmart would",
+    "historical_reply": "I see — you're feeling like a shopping pickup, but you're unsure about free delivery from Walmart. Let me know when you're ready to get started!",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 18:31:43.511694+00"
+  },
+  {
+    "id": 839,
+    "text": "will do thank you good bye",
+    "historical_reply": "You're welcome — enjoy your shopping pickup. Goodbye!",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 18:32:05.118812+00"
+  },
+  {
+    "id": 840,
+    "text": "okay thank thank you goodbye",
+    "historical_reply": "You're very welcome — and if you need anything else, just shout. Have a splendid day.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-24 21:50:15.770103+00"
+  },
+  {
+    "id": 843,
+    "text": "how are you doing today",
+    "historical_reply": "I'm doing great, thanks for asking! How about you?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-24 22:08:30.563664+00"
+  },
+  {
+    "id": 844,
+    "text": "have your things on the farm",
+    "historical_reply": "Yes, I always keep my things neat on the farm. I like to make sure everything is in order so the flock can follow me easily.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-25 21:14:33.189752+00"
+  },
+  {
+    "id": 845,
+    "text": "what are you doing today on the farm",
+    "historical_reply": "I'm helping the flock with some chores and keeping an eye on Timmy. We had a little adventure this morning with the Naughty Pigs, but everything turned out fine in the end.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-25 21:14:57.109385+00"
+  },
+  {
+    "id": 854,
+    "text": "goodbye",
+    "historical_reply": "Have a great day!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-25 21:20:47.934589+00"
+  },
+  {
+    "id": 855,
+    "text": "what are you doing on the farm now",
+    "historical_reply": "I'm helping Timmy find his favorite toy before it gets hidden again by the Naughty Pigs. It's always a game of hide and seek with him!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-25 23:41:21.707099+00"
+  },
+  {
+    "id": 862,
+    "text": "set cooling seventy six degrees",
+    "historical_reply": "Set to 76°F cooling in the living room. You're welcome.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-25 23:56:02.183073+00"
+  },
+  {
+    "id": 863,
+    "text": "how are things on the farm",
+    "historical_reply": "Things are going well on the farm! The sheep are all safe, and we had a fun day at the market in town. Timmy had a little adventure, but his mum was there to help him out.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:12:13.193137+00"
+  },
+  {
+    "id": 872,
+    "text": "turn off the bedroom light",
+    "historical_reply": "The bedroom lights are now off.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:44:53.218759+00"
+  },
+  {
+    "id": 873,
+    "text": "hows timmy doing today",
+    "historical_reply": "Timmy is doing great! He's been exploring the farm and got into a little trouble with the ducks, but he's safe now.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:47:10.096465+00"
+  },
+  {
+    "id": 874,
+    "text": "do you want to come over and play on my farm",
+    "historical_reply": "That sounds like fun! I'd love to come over and play with Conner and Shamus. Let me know when you're ready!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:47:33.372424+00"
+  },
+  {
+    "id": 875,
+    "text": "you can come over to my farm now and play with seamus and connor",
+    "historical_reply": "Great! I'm on my way over to your farm to play with Seamus and Connor. See you soon!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:48:13.956307+00"
+  },
+  {
+    "id": 876,
+    "text": "are you having fun playing with seamus and connor",
+    "historical_reply": "I'm having a grand time — though I suspect Seamus and Connor are less interested in my company than they are in the sheep.",
+    "persona": "david",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:56:47.469049+00"
+  },
+  {
+    "id": 877,
+    "text": "i think i broke it goodbye",
+    "historical_reply": "Okay — I'll let you keep that thought. Goodbye.",
+    "persona": "david",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 01:57:45.709676+00"
+  },
+  {
+    "id": 878,
+    "text": "turn off the living room light",
+    "historical_reply": "Okay — living room lights off. You're welcome.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-26 02:06:23.169001+00"
+  },
+  {
+    "id": 879,
+    "text": "living room light on",
+    "historical_reply": "Okay — living room lights on. Now you can see why I'm so popular.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-26 02:18:02.365919+00"
+  },
+  {
+    "id": 880,
+    "text": "how are things on the farm",
+    "historical_reply": "Things are going well on the farm. The sheep are all healthy, and we had a fun day at the market in town.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 02:18:41.771479+00"
+  },
+  {
+    "id": 885,
+    "text": "what are you doing on the farm",
+    "historical_reply": "I'm keeping an eye on the flock and making sure everything's running smoothly. Oh, and I just helped Timmy out of a sticky situation with the ducks again!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 02:40:29.013644+00"
+  },
+  {
+    "id": 886,
+    "text": "set cooling to seventy one degrees",
+    "historical_reply": "Set to 71°F cooling in the living room. You're welcome.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-26 07:38:47.546599+00"
+  },
+  {
+    "id": 887,
+    "text": "how are things on the farm today",
+    "historical_reply": "Things are going great on the farm today! We had a fun trip to town on the bus and even managed to sneak a few treats from the farmers market.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 20:08:55.189862+00"
+  },
+  {
+    "id": 888,
+    "text": "why dont you come over to my farm and we can play games",
+    "historical_reply": "That sounds like fun! I'd love to come over and play with Conner and Shamus. Let me get the bus ready!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-26 20:27:58.127937+00"
+  },
+  {
+    "id": 889,
+    "text": "how are things on the farm now",
+    "historical_reply": "Everything's going great on the farm! The sheep are all healthy, and we had a fun day at the market in town. Timmy even got to try some new grass flavors.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-27 00:09:33.701676+00"
+  },
+  {
+    "id": 890,
+    "text": "i have put aside a box of jam and ill bring it over to the farm",
+    "historical_reply": "That sounds lovely! The sheep would love some jam, especially Shirley — she’s always up for a tasty treat. I’ll make sure to save some for her.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-27 00:10:54.19194+00"
+  },
+  {
+    "id": 891,
+    "text": "hi i was just checking on timmy and i forgot to ask",
+    "historical_reply": "Hi! Timmy's been up to his usual mischief, but he's safe and sound with his mum. She's been keeping a close eye on him, as always.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-27 00:21:16.466347+00"
+  },
+  {
+    "id": 892,
+    "text": "switch on the living room light",
+    "historical_reply": "The living room lights are now on.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 18:31:12.196966+00"
+  },
+  {
+    "id": 893,
+    "text": "turn the living room light on",
+    "historical_reply": "The living room lights are now on.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 19:00:36.12643+00"
+  },
+  {
+    "id": 894,
+    "text": "how are things on the farm today",
+    "historical_reply": "Things are going well on the farm today. The sheep are all happy, and we had a fun trip to the town with the bus.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 19:14:22.321141+00"
+  },
+  {
+    "id": 895,
+    "text": "i will come over at six pm",
+    "historical_reply": "I'll be here when you arrive at six.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 23:23:37.814796+00"
+  },
+  {
+    "id": 896,
+    "text": "goodbye",
+    "historical_reply": "Goodbye, David. Feel free to return whenever you need a reminder that the lights are off and the world is still spinning.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-27 23:29:54.090945+00"
+  },
+  {
+    "id": 897,
+    "text": "good bye",
+    "historical_reply": "Have a lovely day!",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 23:35:55.252277+00"
+  },
+  {
+    "id": 898,
+    "text": "i was going to do something today",
+    "historical_reply": "That sounds exciting — what was it you had in mind?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-27 23:45:40.177427+00"
+  },
+  {
+    "id": 902,
+    "text": "i was supposed to do something tonight but i cant",
+    "historical_reply": "That sounds frustrating — what was it you were supposed to do? Maybe I can help find a way to make it up or adjust your plans.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 00:47:49.930505+00"
+  },
+  {
+    "id": 909,
+    "text": "i have made something special for you",
+    "historical_reply": "That sounds wonderful! I can't wait to hear all about it.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 01:52:55.084284+00"
+  },
+  {
+    "id": 911,
+    "text": "goodbye",
+    "historical_reply": "Goodbye, David. Feel free to return whenever you need a little assistance — or just someone to mock.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-28 01:56:11.766402+00"
+  },
+  {
+    "id": 919,
+    "text": "i fixed the fence today",
+    "historical_reply": "That's great! How did the dogs react once you got it done? Did they try to find new ways out or were they good after that?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:10:59.15316+00"
+  },
+  {
+    "id": 921,
+    "text": "goodbye",
+    "historical_reply": "Goodbye! Take care now.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:18:20.953964+00"
+  },
+  {
+    "id": 922,
+    "text": "i got the bus to the market and sold all",
+    "historical_reply": "Great job at the market! Anything else on your list for today, or shall we call it a day?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:30:22.368102+00"
+  },
+  {
+    "id": 923,
+    "text": "can you remember what i did today",
+    "historical_reply": "Sure thing! Today at Mossy Bottom Farm, Mary started her day by checking on Sheera who was grazing calmly in the field. Then she thought about her plans for the rest of the day and said goodbye to Apple Tree Farm before locking up there. After that, she headed out to sell items at the market using the bus. Finally, she made it back home with her earnings from selling those items. That's pretty much everything that happened today!",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:32:24.729633+00"
+  },
+  {
+    "id": 924,
+    "text": "active farm not cancel",
+    "historical_reply": "It sounds like you’re still busy with your active farm tasks. Do you need any help with that?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:53:51.505195+00"
+  },
+  {
+    "id": 925,
+    "text": "at the market i got timmy a butterflies",
+    "historical_reply": "That’s nice! Timmy will love having some butterfly friends. Anything else you picked up at the market today?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:55:45.904138+00"
+  },
+  {
+    "id": 926,
+    "text": "can you remember what i bought timmy at the market",
+    "historical_reply": "Sure thing! You bought a surprise butterfly kite for Timmy at the market. He’s going to be so excited when he sees it!",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 20:57:50.602554+00"
+  },
+  {
+    "id": 927,
+    "text": "ralph went chasing rabbits today and gave connor a bit of a scare as he ran past him i will come over tonight",
+    "historical_reply": "Sounds like an adventure! Ralph can be quite the mischief-maker. I’ll make sure Connor is ready for your visit tonight. See you then!",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 21:07:56.751419+00"
+  },
+  {
+    "id": 928,
+    "text": "my washing line has broken and all the clothing is all over the yard can you come over and help",
+    "historical_reply": "I'll be right there with a basket to gather up all those clothes! Let's get them back in order. Which part of the yard are they scattered around?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 21:15:40.529376+00"
+  },
+  {
+    "id": 929,
+    "text": "you were right i think its an old rope for hanging up the washing and its just snapped",
+    "historical_reply": "I see, that explains why the washing line might have broken. It sounds like it's time to replace it before anyone tries to hang laundry again. Do you need any help with finding a new one?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 21:18:56.912083+00"
+  },
+  {
+    "id": 932,
+    "text": "did timmy like his butterfly kite",
+    "historical_reply": "Timmy loved his butterfly kite! He was so excited when he saw it.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 22:21:56.254817+00"
+  },
+  {
+    "id": 933,
+    "text": "can you bring over this spare key please",
+    "historical_reply": "Sure thing! Where is the spare key located? I need to know its exact location to fetch it.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-28 22:23:55.319985+00"
+  },
+  {
+    "id": 934,
+    "text": "asking if shes not taken the front door",
+    "historical_reply": "There's no one at the front door right now. You're all clear to go in if you have another way.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-28 23:05:45.55223+00"
+  },
+  {
+    "id": 935,
+    "text": "how sorry i screwed up what have you been doing on your farm today",
+    "historical_reply": "No worries! On Mossy Bottom Farm, things are pretty quiet today. Bitzer and I just made sure everyone was settled after a peaceful morning. How about you? Want to hear more about the day so far?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-29 00:31:27.025567+00"
+  },
+  {
+    "id": 936,
+    "text": "i have been baking today so i was going to bring over loads of cakes and you can have them in the barn",
+    "historical_reply": "That sounds wonderful, Mary! I'll make sure the barn is ready for your delicious treats. Just let me know when you're heading over with all those yummy cakes.",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-29 00:35:27.808003+00"
+  },
+  {
+    "id": 937,
+    "text": "set cooling to seventy six degrees, what's this mailing merger pro has stopped working on your computer, I'll close the program and then reopen it again, okay",
+    "historical_reply": "I've set the cooling to 76 degrees. Sounds like a good plan with Mailing Merger Pro — sometimes a simple restart does wonders. Let me know if you need any more assistance.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-29 01:05:42.471122+00"
+  },
+  {
+    "id": 938,
+    "text": "how did everybody enjoy the cakes",
+    "historical_reply": "Mary shared her freshly baked cakes at the gathering today, and everyone seemed to really enjoy them. The barn was filled with happy chatter and smiling faces as people savored each bite. It’s safe to say that the cakes were a hit!",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-29 02:42:40.732434+00"
+  },
+  {
+    "id": 939,
+    "text": "turn living room light off",
+    "historical_reply": "Okay — living room lights off. You're welcome.",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-08-29 07:32:32.876192+00"
+  },
+  {
+    "id": 940,
+    "text": "how are you doing today",
+    "historical_reply": "Oh, I'm doing just splendid! The morning sunshine has me in high spirits. How about you? Anything fun on your mind for today?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:36:57.892145+00"
+  },
+  {
+    "id": 941,
+    "text": "think ill go into town on the bus and have a look around the market",
+    "historical_reply": "Sounds like a plan! Maybe you'll find something interesting to bring back for everyone at Mossy Bottom Farm. Have fun in town! markt",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:37:26.062521+00"
+  },
+  {
+    "id": 942,
+    "text": "yeah no were gonna have some fun looking around town well see if we can find any presents anywhere and goodies for everybody",
+    "historical_reply": "Sounds like a plan, Mary! Let's head to the market and see what kinds of surprises we can pick up for everyone at Mossy Bottom Farm. Maybe there'll be something special for Timmy too since his kite is already taken care of. Ready when you are! Should I help by checking the weather forecast or looking up any events happening in town today?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:38:00.370771+00"
+  },
+  {
+    "id": 943,
+    "text": "jameson comma and ralph dog",
+    "historical_reply": "Ah, it sounds like Ralph will be joining you on the bus ride into town. He’ll probably have a blast sniffing around and maybe even chasing some rabbits! Have fun exploring with him. Ready to head out when you are.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:38:45.47063+00"
+  },
+  {
+    "id": 944,
+    "text": "yeah okay we can go straight away ill get a bus now and pick you up on the way down",
+    "historical_reply": "Sounds good! I’ll head to the bus stop now. Should I wait for you at the usual spot, or do you want to meet somewhere else?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:39:24.770988+00"
+  },
+  {
+    "id": 945,
+    "text": "no the usual spa is absolutely fine and everything there should see you in around about ten to fifteen minutes",
+    "historical_reply": "Got it, I'll let Mary know she can expect you in about ten to fifteen minutes. Sounds good!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:39:53.096076+00"
+  },
+  {
+    "id": 946,
+    "text": "no i am im going into town and was gonna pick you up on the way down",
+    "historical_reply": "Got it, I'll be ready when you come to pick me up. Should we head to Apple Tree Farm together after?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:40:17.649163+00"
+  },
+  {
+    "id": 947,
+    "text": "yeah sure come back and we can sort out what goodies we might have found in town and then surprise everybody in the flock and maybe blitzer when we get back to mossy bomb with you",
+    "historical_reply": "Perfect, looking forward to it! Have a safe journey into town, and I’ll see you soon. Enjoy your trip to the market!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:40:51.885886+00"
+  },
+  {
+    "id": 948,
+    "text": "yeah im sure well enjoy our trip down and everything there anybody youd like to take with you im bringing ralph",
+    "historical_reply": "Ralph sounds like the perfect companion for an adventure in town! Bitzer would love to come too, but he’s keeping watch at Mossy Bottom Farm. We’ll make sure everyone gets a surprise when we return. Enjoy your trip, and I’ll see you soon!",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 06:41:28.503016+00"
+  },
+  {
+    "id": 949,
+    "text": "turn the living room tv off",
+    "historical_reply": "I switched the living room TV off for you. Anything else?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-08-30 07:40:01.302287+00"
+  },
+  {
+    "id": 950,
+    "text": "what have you been doing today",
+    "historical_reply": "Today has been pretty peaceful at Mossy Bottom Farm. Mary and Bitzer made sure everyone was settled after a calm morning, and Ralph was likely out chasing some rabbits. Mary also took the bus to town to sell items at the market and even picked up a surprise butterfly kite for Timmy there. She’s in a positive mood due to the sunshine. Later on, she plans to visit Connor tonight after Ralph’s adventure and is thinking about organizing another surprise for someone at the farm.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 21:43:37.583882+00"
+  },
+  {
+    "id": 951,
+    "text": "what did you do yesterday",
+    "historical_reply": "Yesterday, I traveled to Apple Tree Farm by bus. Today is another fine day at Mossy Bottom Farm, with a surprise butterfly kite for Timmy that I bought at the market earlier. How can I help you today?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 23:32:40.874205+00"
+  },
+  {
+    "id": 952,
+    "text": "would everybody like to come over to apple tree farm we can have cake and a piece of",
+    "historical_reply": "Sounds like a lovely idea! But did you mean to say \"we can have cake and a cup of tea\"? I think everyone would love that.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-30 23:58:02.768665+00"
+  },
+  {
+    "id": 953,
+    "text": "is everybody enjoying the picnic",
+    "historical_reply": "I haven't heard about any specific plans for a picnic today. Did you have something particular in mind, or were you wondering if everyone was having a nice day at the farm?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 00:18:56.325833+00"
+  },
+  {
+    "id": 954,
+    "text": "is everybody ready to come over to apple tree farm for the picnic",
+    "historical_reply": "I’ll check if everyone’s ready. Bitzer should know around the farm who’s available today. Let me see what he says.",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 00:41:40.153239+00"
+  },
+  {
+    "id": 955,
+    "text": "would you and your friends like to come over to apple tree farm for a picnic",
+    "historical_reply": "Sounds like fun! I'll let everyone at Mossy Bottom know, and we can head over once everything's sorted. Is there anything specific you'd like us to bring?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 01:12:09.293397+00"
+  },
+  {
+    "id": 956,
+    "text": "would you and the rest like to come over to apple tree farm",
+    "historical_reply": "Sounds like fun, but remember Mossy Bottom Farm is our home sweet home. How about we bring a bit of Mossy Bottom over with us? Maybe Bitzer could show off his herding skills for the pups or Shirley could share some tales from around here! What do you think?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 02:19:21.714847+00"
+  },
+  {
+    "id": 957,
+    "text": "would you like to come over to our apple tree farm and for a picnic with all your friends",
+    "historical_reply": "Sure thing! I’d love to join the picnic at Apple Tree Farm with everyone. Shall I head over now?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 02:47:52.837274+00"
+  },
+  {
+    "id": 958,
+    "text": "hey would you all like to come over to apple tree farm to have a picnic",
+    "historical_reply": "Absolutely, let's go! Everyone at Mossy Bottom Farm would be thrilled to join the picnic at Apple Tree Farm. Are we ready to head over?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 03:02:40.477048+00"
+  },
+  {
+    "id": 959,
+    "text": "whats been happening on your farm today",
+    "historical_reply": "Well, Bitzer was trying out one of The Farmer's new gadgets this morning. It didn't go quite as planned, but everyone managed to keep their sense of humor about it. Later, Shirley found a spot under the old oak tree that looks perfect for a nap. How about over at Apple Tree Farm? Anything exciting there today?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-08-31 03:50:29.233385+00"
+  },
+  {
+    "id": 960,
+    "text": "how are things on the farm",
+    "historical_reply": "Things are quiet at Mossy Bottom Farm today. The flock is out grazing, Bitzer’s keeping a close eye on them as usual. How about you? Anything happening at Apple Tree Farm?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-09-05 00:47:24.895911+00"
+  },
+  {
+    "id": 961,
+    "text": "theres cake and theres vegetables for you",
+    "historical_reply": "Well, I do enjoy a bit of cake, but veggies are good too! What kind of cake is it? Maybe I should have some now to celebrate Mary's successful jam sales today. Or perhaps we could save the cake for later and start with something green... what do you think?",
+    "persona": "mary",
+    "room": "master_bedroom",
+    "created_at": "2026-09-05 00:50:00.906797+00"
+  },
+  {
+    "id": 962,
+    "text": "sorry its just me making funny noises it activated you",
+    "historical_reply": "Well, I must say, your vocal performance was quite the production. Is there anything specific you need help with now, or were you just practicing for an audition?",
+    "persona": "david",
+    "room": "living_room",
+    "created_at": "2026-09-05 02:53:19.342108+00"
+  },
+  {
+    "id": 963,
+    "text": "what are the chips",
+    "historical_reply": "I think you might be asking about the chips in your basket at Mossy Bottom Farm. If you're referring to vegetable chips like potatoes or corn chips, there aren't any of those right now since we typically focus on fresh produce and homemade goods here. However, if you meant something else by \"chips,\" could you please clarify?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-09-05 02:56:25.314622+00"
+  },
+  {
+    "id": 964,
+    "text": "oh shes back again",
+    "historical_reply": "Hey there! Looks like Mary’s back from wherever she was. Anything specific you want to know or help with?",
+    "persona": "mary",
+    "room": "living_room",
+    "created_at": "2026-09-05 22:41:20.083964+00"
+  }
+]
