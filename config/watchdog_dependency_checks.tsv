@@ -41,3 +41,8 @@ Open WebUI	http	http://${MAIN_SERVER_IP}:3000
 Local MCP Agent	http	http://${MAIN_SERVER_IP}:3997/health
 
 Jellyfin	http	http://${JELLYFIN_IP}:8096/health
+
+# Z4 (HP Z4 G4) - primary NAS (RAID5) and Frigate host; NAS_PRIMARY is its IP.
+Z4 Host	http	http://${NAS_PRIMARY}:9191/metrics	critical
+Z4 RAID Arrays	command	python3 /home/davids/ai-watchdog/scripts/watchdog_z4_health.py raid ${NAS_PRIMARY}	critical
+Z4 Temps & Disks	command	python3 /home/davids/ai-watchdog/scripts/watchdog_z4_health.py health ${NAS_PRIMARY}
