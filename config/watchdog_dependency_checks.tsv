@@ -39,3 +39,5 @@ Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered
 SearXNG	http	http://${MAIN_SERVER_IP}:8181
 Open WebUI	http	http://${MAIN_SERVER_IP}:3000
 Local MCP Agent	http	http://${MAIN_SERVER_IP}:3997/health
+
+Jellyfin	http	http://${JELLYFIN_IP}:8096/health
