@@ -12,7 +12,7 @@ DEFAULTS = {
     "HA_SERVER_IP": "10.0.0.30",
     "NAS_PRIMARY": "10.0.0.60",
     "NAS_SECONDARY": "10.0.0.6",
-    "FRIGATE_HOST_IP": "10.0.0.85",
+    "FRIGATE_HOST_IP": "10.0.0.60",
     "BEDROOM_LUNA_IP": "10.0.0.214",
     "LIVING_ROOM_IP": "10.0.0.66",
     "JELLYFIN_IP": "10.0.0.107",

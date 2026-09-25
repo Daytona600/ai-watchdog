@@ -13,7 +13,7 @@ REPORT="$BASE/reports/watchdog-frigate-$STAMP.md"
 mkdir -p "$OUT" "$BASE/reports"
 
 [ -f "$HOSTS_CONF" ] && source "$HOSTS_CONF"
-FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.85}"
+FRIGATE_HOST_IP="${FRIGATE_HOST_IP:-10.0.0.60}"
 
 FRIGATE_BASE_URL="http://$FRIGATE_HOST_IP:5000"
 FRIGATE_WARN_ZERO_FPS="1"
