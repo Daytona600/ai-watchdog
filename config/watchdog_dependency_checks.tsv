@@ -21,6 +21,7 @@ Kokoro TTS	container	kokoro-tts
 Parakeet STT	container	parakeet-stt
 OpenWakeWord Living Room	container	openwakeword-livingroom
 OpenWakeWord Bedroom	container	openwakeword-bedroom
+OpenWakeWord Kitchen	container	openwakeword-kitchen
 MQTT	container	cedalo_platform-mosquitto-1
 Caddy HA proxy	container	caddy-ha	critical
 AdGuard DNS	container	adguardhome	critical
@@ -41,6 +42,9 @@ Open WebUI	http	http://${MAIN_SERVER_IP}:3000
 Local MCP Agent	http	http://${MAIN_SERVER_IP}:3997/health
 
 Jellyfin	http	http://${JELLYFIN_IP}:8096/health
+# The Jellyfin mini PC is also the kitchen voice satellite (eMeet Luna, added
+# 2026-09-26); /busy is the satellite speaker service's own status endpoint.
+Kitchen Satellite	http	http://${JELLYFIN_IP}:3994/busy
 
 # Z4 (HP Z4 G4) - primary NAS (RAID5) and Frigate host; NAS_PRIMARY is its IP.
 Z4 Host	http	http://${NAS_PRIMARY}:9191/metrics	critical
