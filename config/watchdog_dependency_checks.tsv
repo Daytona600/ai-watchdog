@@ -44,5 +44,15 @@ Jellyfin	http	http://${JELLYFIN_IP}:8096/health
 
 # Z4 (HP Z4 G4) - primary NAS (RAID5) and Frigate host; NAS_PRIMARY is its IP.
 Z4 Host	http	http://${NAS_PRIMARY}:9191/metrics	critical
-Z4 RAID Arrays	command	python3 /home/davids/ai-watchdog/scripts/watchdog_z4_health.py raid ${NAS_PRIMARY}	critical
-Z4 Temps & Disks	command	python3 /home/davids/ai-watchdog/scripts/watchdog_z4_health.py health ${NAS_PRIMARY}
+Z4 RAID Arrays	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py raid --ssh apex-agent-z4 ${NAS_PRIMARY}	critical
+Z4 Temps & Disks	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py health ${NAS_PRIMARY}
+
+# EPYC LLM box (EPYC 7551P / H11SSL-i, rebuilt from the X99 2026-09-25) - serves
+# qwen3.6-coder to OpenCode on every box. Its agent reports GPU edge temps only,
+# so junction and CPU temps are read over SSH.
+EPYC LLM Host	http	http://${EPYC_LLM_IP}:9191/metrics
+EPYC Ollama Model	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py ollama ${EPYC_LLM_IP} qwen3.6-coder
+EPYC OpenCode Web	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py http-up http://${EPYC_LLM_IP}:4096/ 200 401
+EPYC Fan Control	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py unit --ssh apex-agent-second ${EPYC_LLM_IP} gpu-fan-control.service
+EPYC Temps	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py sensors --ssh apex-agent-second ${EPYC_LLM_IP} --gpu-junction-warn 95 --cpu-warn 85
+EPYC GPUs & Disk	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py health ${EPYC_LLM_IP} --gpus 2 --gpu-temp-warn 90

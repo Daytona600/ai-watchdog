@@ -16,6 +16,7 @@ DEFAULTS = {
     "BEDROOM_LUNA_IP": "10.0.0.214",
     "LIVING_ROOM_IP": "10.0.0.66",
     "JELLYFIN_IP": "10.0.0.107",
+    "EPYC_LLM_IP": "10.0.0.188",
 }
 
 _ASSIGNMENT = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"?([^"\n]*)"?\s*$')
