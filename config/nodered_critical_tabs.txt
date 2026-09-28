@@ -1,4 +1,11 @@
 # Current live Node-RED production tabs
+# Each line is matched case-insensitively as a substring of a live tab label,
+# so version suffixes like "v6.1" don't need to be listed. Rebuilt 2026-09-27
+# from the live project flows (projects/Home_AI_system/flows.json). The old
+# list came from the stale pre-projects /data/flows.json and still named
+# retired tabs: AI 07 Living Room Assist bridge, the Qdrant-era AI 08/09
+# (renamed after the Postgres memory migration), AI13 Planner Test, the
+# ThinkPad satellite entries, DEV 04A/04B memory and the old web search tabs.
 
 AI 00 - HA Entity Sync
 AI 01 - Natural Language Light Control
@@ -7,9 +14,8 @@ AI 03 - Climate Control
 AI 04 - Speech Confirmation Gateway
 AI 05 - Media Transport Control
 AI 06 Dynamic Music Search
-AI 07 - Living Room Assist HTTP Bridge
-AI 08 - Qdrant Memory Learning
-AI 09 - Qdrant Music Hints
+AI 08 - Music Hint Learning
+AI 09 - Music Hints Lookup
 AI 10 - Conversation Fallback
 AI 11 - Read Only State Answers
 
@@ -17,12 +23,10 @@ AI 11 - Read Only State Answers
 AI00 - Config Init
 AI06A Music Library Cache
 AI12 Blind Control
-AI13 Planner Test
-AI 14 - ThinkPad Satellite Entry
-Satellite - ThinkPad Entry
-
-# Memory/search support
-DEV 04A Memory Recall
-DEV 04B Memory Write
-SearXNG -> Ollama Web Answer
-Web Search
+AI-CONV - Shaun Chat Mode
+AI-IC
+AI-SEC - Security & Presence
+Shared Tool-Calling Engine
+sidecar path
+Voice Switcher
+Wake Word Switcher
