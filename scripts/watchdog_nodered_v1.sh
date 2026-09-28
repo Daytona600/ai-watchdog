@@ -28,10 +28,14 @@ if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   add_attention "Node-RED container is not running: $CONTAINER"
   echo "Node-RED container is not running."
 else
-  docker cp "$CONTAINER:/data/flows.json" "$OUT/flows.raw.json" 2>"$OUT/docker-cp-error.txt" || true
+  FLOWS_PATH="$("$BASE/scripts/nodered_flows_path.sh" "$CONTAINER" 2>/dev/null)"
+  FLOWS_PATH="${FLOWS_PATH:-/data/flows.json}"
+  echo "Flows file: $FLOWS_PATH" >> "$REPORT"
+  echo "" >> "$REPORT"
+  docker cp "$CONTAINER:$FLOWS_PATH" "$OUT/flows.raw.json" 2>"$OUT/docker-cp-error.txt" || true
 
   if [ ! -s "$OUT/flows.raw.json" ]; then
-    add_attention "Could not read /data/flows.json from Node-RED container."
+    add_attention "Could not read $FLOWS_PATH from Node-RED container."
   fi
 fi
 

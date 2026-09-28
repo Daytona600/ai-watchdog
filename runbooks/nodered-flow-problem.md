@@ -7,9 +7,16 @@ Check Node-RED:
 docker ps --filter name=nodered
 docker logs --tail 100 nodered
 
+Node-RED runs in projects mode, so the live flows are in the active project
+(/data/projects/Home_AI_system/flows.json), not /data/flows.json. The old
+top-level copy is /data/flows-old.json and is not read by anything. Find the
+live path:
+
+~/ai-watchdog/scripts/nodered_flows_path.sh
+
 Show live tabs:
 
-docker exec nodered node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('/data/flows.json','utf8')); console.log(j.filter(n=>n.type==='tab').map(n=>n.label).sort().join('\n'));"
+docker exec nodered node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('$(~/ai-watchdog/scripts/nodered_flows_path.sh)','utf8')); console.log(j.filter(n=>n.type==='tab').map(n=>n.label).sort().join('\n'));"
 
 Rerun watchdog:
 

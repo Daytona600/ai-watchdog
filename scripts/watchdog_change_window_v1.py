@@ -241,7 +241,11 @@ def capture_nodered():
         "package_dependencies": {},
     }
 
-    flow = run("docker exec nodered sh -c 'cat /data/flows.json 2>/dev/null'", timeout=20)
+    # Live flows are in the active Node-RED project, not /data/flows.json.
+    path = run(f"bash {BASE}/scripts/nodered_flows_path.sh nodered", timeout=20)
+    flows_path = path["stdout"].strip() if path["ok"] and path["stdout"].strip() else "/data/flows.json"
+    result["flows_path"] = flows_path
+    flow = run(f"docker exec nodered cat {flows_path}", timeout=20)
     if flow["ok"] and flow["stdout"]:
         result["flow_sha256"] = sha256_text(flow["stdout"])
         try:
