@@ -53,9 +53,12 @@ if ignore_file.exists():
             continue
         ignore_patterns.append(re.compile(line, re.I))
 
+# The master report's Final Summary titles this section "HA Critical Entity
+# Problems" (word order differs from the HA report's own heading).
 section_keys = (
     "attention needed",
     "critical ha entity problems",
+    "ha critical entity problems",
 )
 
 clean_phrases = (
