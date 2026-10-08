@@ -7,6 +7,8 @@ Dashboard	AI Watchdog Master	Generates latest report/dashboard files
 Dashboard	AI Watchdog Heartbeat	Refreshes heartbeat and dashboard state
 Dashboard	Open WebUI	Standalone Ollama chat UI, tracked but nothing else depends on it
 
+AdGuard DNS Replica	AdGuard DNS	Second DNS server on the Z4; its config is a manual copy of the main server's AdGuardHome.yaml
+
 AI Watchdog Master	Docker	Reads container status and logs
 AI Watchdog Master	Home Assistant API	Reads HA state and backup sensors
 AI Watchdog Master	Frigate API	Reads camera/storage health

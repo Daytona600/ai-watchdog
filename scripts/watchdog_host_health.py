@@ -16,6 +16,12 @@ Usage:
   watchdog_host_health.py http-up URL [CODE ...]
       URL answers with one of CODE (default 200) - e.g. 401 for a
       password-protected page that is up
+  watchdog_host_health.py dns HOST [--name N] [--same-as REF_HOST [--same-name N2]]
+      HOST answers a DNS lookup (default example.com). With --same-as it must
+      also give the same answer as REF_HOST for N2 (default ha.magnumz.com, the
+      one local-name rewrite) - catches a replica whose AdGuard config copy has
+      gone stale. If REF_HOST itself is down that half is skipped (its own
+      check reports it). Needs `dig` on the watchdog host.
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only
@@ -171,6 +177,38 @@ def http_up(args):
     return [] if code in codes else [f"HTTP {code} (expected {'/'.join(map(str, sorted(codes)))})"]
 
 
+def _dig(server, name, timeout=2):
+    """Sorted IPv4 answers from SERVER for NAME; None when the server gives no reply at all."""
+    try:
+        r = subprocess.run(["dig", f"@{server}", f"+time={timeout}", "+tries=1", "+short", name, "A"],
+                           capture_output=True, text=True, timeout=timeout + 3)
+    except FileNotFoundError:
+        raise RuntimeError("dig is not installed on the watchdog host")
+    except subprocess.TimeoutExpired:
+        return None
+    if r.returncode != 0:  # dig exits 9 when nothing answered
+        return None
+    return sorted(w for w in r.stdout.split() if re.fullmatch(r"\d{1,3}(\.\d{1,3}){3}", w))
+
+
+def dns(args):
+    got = _dig(args.host, args.name)
+    if got is None:
+        return [f"{args.host} did not answer a DNS lookup for {args.name} - check the AdGuard container on that "
+                f"host (docker ps; systemctl status adguardhome-guard)"]
+    if not got:
+        return [f"{args.host} answered but returned no address for {args.name}"]
+    if args.same_as:
+        ref = _dig(args.same_as, args.same_name)
+        if ref:  # reference down/empty -> its own check reports that; don't blame this server
+            mine = _dig(args.host, args.same_name)
+            if mine != ref:
+                return [f"{args.host} answers {args.same_name} with {', '.join(mine) if mine else 'nothing'} but "
+                        f"{args.same_as} says {', '.join(ref)} - its AdGuard config copy is out of date; re-copy "
+                        f"AdGuardHome.yaml from {args.same_as} and recreate the container"]
+    return []
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="mode", required=True)
@@ -184,6 +222,8 @@ def main():
     s = sub.add_parser("unit"); s.add_argument("--ssh", required=True); s.add_argument("host"); s.add_argument("unit"); s.set_defaults(fn=unit)
     s = sub.add_parser("ollama"); s.add_argument("host"); s.add_argument("model"); s.set_defaults(fn=ollama)
     s = sub.add_parser("http-up"); s.add_argument("url"); s.add_argument("codes", nargs="*"); s.set_defaults(fn=http_up)
+    s = sub.add_parser("dns"); s.add_argument("host"); s.add_argument("--name", default="example.com")
+    s.add_argument("--same-as"); s.add_argument("--same-name", default="ha.magnumz.com"); s.set_defaults(fn=dns)
 
     args = p.parse_args()
     try:

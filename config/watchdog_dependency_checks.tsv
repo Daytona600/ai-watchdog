@@ -25,6 +25,7 @@ OpenWakeWord Kitchen	container	openwakeword-kitchen
 MQTT	container	cedalo_platform-mosquitto-1
 Caddy HA proxy	container	caddy-ha	critical
 AdGuard DNS	container	adguardhome	critical
+AdGuard DNS Replica	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py dns ${DNS_REPLICA_IP} --same-as ${MAIN_SERVER_IP}	warning
 GitHub Repo	git-clean	/home/davids/ai-watchdog	info
 NAS Mounts	path	/mnt/frigate_nas	critical
 Watchdog Config	path	/home/davids/ai-watchdog/config
