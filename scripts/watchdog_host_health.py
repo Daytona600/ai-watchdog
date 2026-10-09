@@ -384,29 +384,36 @@ def _answers(url, timeout):
 
 
 def config_urls(args):
-    urls, why = None, None
+    problems, urls, why = [], None, None
     try:
         raw = _get_json(f"http://{args.host}:{args.nodered_port}/context/global/AI_CONFIG?store=memory", 2)
-        cfg = json.loads(raw["msg"]) if isinstance(raw.get("msg"), str) else raw.get("msg")
-        urls = (cfg or {}).get("urls")
+        msg = raw.get("msg")
+        if isinstance(msg, str) and msg.strip().lower() in ("(undefined)", "undefined", ""):
+            # Node-RED answers but the config loader has not (or could not) load AI_CONFIG: every node that reads an
+            # address now fails loudly instead of using a hard-coded one, so say so first
+            problems.append("Node-RED is up but has NO AI_CONFIG loaded (the config loader failed or has not run) - "
+                            "check 'docker logs nodered' for AI00 errors and re-run the 'Init AI config' inject")
+        else:
+            cfg = json.loads(msg) if isinstance(msg, str) else msg
+            urls = (cfg or {}).get("urls")
     except Exception as e:
         why = f"{type(e).__name__}: {e}"
     if not isinstance(urls, dict) or not urls:
         try:  # Node-RED not answering or AI_CONFIG not loaded yet: use the row it is loaded from
             urls = _get_json(f"http://{args.host}:{args.pgrst_port}/config_sections?section_key=eq.urls", 2)[0]["value"]
         except Exception as e:
-            return [f"cannot read AI_CONFIG.urls from Node-RED ({why}) or from Postgres ({type(e).__name__}: {e})"]
+            return problems + [f"cannot read AI_CONFIG.urls from Node-RED ({why}) or from Postgres ({type(e).__name__}: {e})"]
     todo = {k: v for k, v in urls.items()
             if isinstance(v, str) and v.startswith(("http://", "https://")) and k not in args.ignore}
     if not todo:
-        return ["AI_CONFIG.urls has no http(s) entries to check"]
+        return problems + ["AI_CONFIG.urls has no http(s) entries to check"]
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(16, len(todo))) as ex:
         results = dict(zip(todo, ex.map(lambda u: _answers(u, 2.5), todo.values())))
     bad = [f"{k} ({todo[k]}) does not answer: {r}" for k, r in sorted(results.items()) if r]
     if bad:
         bad.append("fix the value in Postgres memory.config_sections (section 'urls') and re-run the 'Init AI config' inject "
                    "- see runbooks/config-url-stale.md")
-    return bad
+    return problems + bad
 
 
 _ADDR = re.compile(r"(?<![\d.])(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}"

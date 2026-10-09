@@ -29,8 +29,12 @@ curl -s -X POST http://10.0.0.35:1880/inject/d1bb4e9ee76c87f1
 
 Re-run the check:
 
-python3 ~/ai-watchdog/scripts/watchdog_host_health.py config-urls 10.0.0.35 --ignore planner_url --ignore qdrant_url
+python3 ~/ai-watchdog/scripts/watchdog_host_health.py config-urls 10.0.0.35
 
-If an entry is a retired service that no node reads (planner_url and qdrant_url today), either delete the key from the
-Postgres row after checking no node uses it, or list it with --ignore KEY on the check's line in
-config/watchdog_dependency_checks.tsv.
+If an entry is a retired service that no node reads, delete the key from the Postgres row after checking that no node uses it
+(planner_url, qdrant_url and thinkpad_music_url were removed that way on 2026-10-09), or, as a last resort, list it with
+--ignore KEY on the check's line in config/watchdog_dependency_checks.tsv.
+
+If the check says Node-RED has NO AI_CONFIG loaded, the config loader ("Set AI global config -v2") failed: look for AI00 errors in
+`docker logs nodered` (PostgREST down? PGRST_URL missing from the container?) and re-run the "Init AI config" inject (the curl above).
+Until the config is loaded every node that needs an address stops with "AI_CONFIG.urls.<key> is not set" instead of guessing.
