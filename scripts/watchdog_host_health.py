@@ -40,6 +40,14 @@ Usage:
       one local-name rewrite) - catches a replica whose AdGuard config copy has
       gone stale. If REF_HOST itself is down that half is skipped (its own
       check reports it). Needs `dig` on the watchdog host.
+  watchdog_host_health.py config-urls HOST [--ignore KEY ...] [--nodered-port P] [--pgrst-port P]
+      every address in Node-RED's loaded AI_CONFIG.urls (read from the Node-RED
+      context API on HOST, falling back to the Postgres row it is loaded from)
+      answers. Any HTTP reply counts, even 404/405; only a refused or timed-out
+      connection fails. Catches a service that moved while the central config kept
+      the old address: the nodes read these URLs, so the failure is otherwise silent
+      (2026-10-09: urls.frigate_base_url pointed at a dead host for a month).
+      --ignore KEY skips an entry that is known to be dead and unused.
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only
@@ -47,6 +55,7 @@ needs editing there. Exits 0 when healthy; otherwise prints what is wrong
 (shown as the check's detail on the dashboard) and exits 1.
 """
 import argparse
+import concurrent.futures
 import json
 import re
 import socket
@@ -351,6 +360,49 @@ def dns(args):
     return []
 
 
+def _get_json(url, timeout):
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ai-watchdog/1.0"}), timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8", "replace"))
+
+
+def _answers(url, timeout):
+    """None when something answers the HTTP request (any status), else a short reason."""
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ai-watchdog/1.0"}), timeout=timeout):
+            return None
+    except urllib.error.HTTPError:
+        return None  # 404 / 405 / 500 are still an answer: the host and port are alive
+    except Exception as e:  # refused, unreachable, timed out, malformed URL
+        reason = getattr(e, "reason", e)
+        return "timed out" if isinstance(reason, TimeoutError) or "timed out" in str(reason) else str(reason)
+
+
+def config_urls(args):
+    urls, why = None, None
+    try:
+        raw = _get_json(f"http://{args.host}:{args.nodered_port}/context/global/AI_CONFIG?store=memory", 2)
+        cfg = json.loads(raw["msg"]) if isinstance(raw.get("msg"), str) else raw.get("msg")
+        urls = (cfg or {}).get("urls")
+    except Exception as e:
+        why = f"{type(e).__name__}: {e}"
+    if not isinstance(urls, dict) or not urls:
+        try:  # Node-RED not answering or AI_CONFIG not loaded yet: use the row it is loaded from
+            urls = _get_json(f"http://{args.host}:{args.pgrst_port}/config_sections?section_key=eq.urls", 2)[0]["value"]
+        except Exception as e:
+            return [f"cannot read AI_CONFIG.urls from Node-RED ({why}) or from Postgres ({type(e).__name__}: {e})"]
+    todo = {k: v for k, v in urls.items()
+            if isinstance(v, str) and v.startswith(("http://", "https://")) and k not in args.ignore}
+    if not todo:
+        return ["AI_CONFIG.urls has no http(s) entries to check"]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(16, len(todo))) as ex:
+        results = dict(zip(todo, ex.map(lambda u: _answers(u, 2.5), todo.values())))
+    bad = [f"{k} ({todo[k]}) does not answer: {r}" for k, r in sorted(results.items()) if r]
+    if bad:
+        bad.append("fix the value in Postgres memory.config_sections (section 'urls') and re-run the 'Init AI config' inject "
+                   "- see runbooks/config-url-stale.md")
+    return bad
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="mode", required=True)
@@ -373,6 +425,9 @@ def main():
     s.add_argument("--max-age-hours", type=float, default=50); s.set_defaults(fn=backup)
     s = sub.add_parser("dns"); s.add_argument("host"); s.add_argument("--name", default="example.com")
     s.add_argument("--same-as"); s.add_argument("--same-name", default="ha.magnumz.com"); s.set_defaults(fn=dns)
+    s = sub.add_parser("config-urls"); s.add_argument("host"); s.add_argument("--ignore", action="append", default=[])
+    s.add_argument("--nodered-port", type=int, default=1880); s.add_argument("--pgrst-port", type=int, default=3011)
+    s.set_defaults(fn=config_urls)
 
     args = p.parse_args()
     try:

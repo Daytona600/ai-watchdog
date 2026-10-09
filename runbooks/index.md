@@ -11,3 +11,4 @@ Manual recovery notes for common watchdog alerts.
 - GPU VRAM high: gpu-vram-high.html
 - HA backup stale: ha-backup-stale.html
 - Backup problem (restic, three machines): backup-problem.html
+- Node-RED config URL stale: config-url-stale.html
