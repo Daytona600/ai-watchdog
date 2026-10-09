@@ -338,7 +338,7 @@ def ha_section(ha):
         "  </div>",
         '  <div class="subhead">Add-ons (%d)</div>' % len(addons),
         table(rows),
-        '  <div class="note">CPU and RAM are read from /proc inside the SSH add-on, which shares the host kernel. Frigate and Node-RED are stopped on purpose: Frigate runs on the Z4 and Node-RED on the main server.</div>',
+        '  <div class="note">CPU and RAM are read from /proc inside the SSH add-on, which shares the host kernel. Frigate and Node-RED are stopped on purpose: Frigate runs on the Z4 and Node-RED on the main server. Cloudflared (the tunnel behind ha.magnumz.com) runs with its watchdog turned on, so Home Assistant restarts it if it stops.</div>',
         "</section>"])
 
 
@@ -378,7 +378,6 @@ def backups_section():
 
 
 NEEDS_A_LOOK = [
-    ("Home Assistant", "The Cloudflared add-on is in an error state. It started right after the 13:39 power cut, could not reach Cloudflare yet, gave up after four tries and has been stopped since. Starting it brings the tunnel back; turning on the add-on's watchdog would let it recover on its own next time."),
     ("Main server", "postfix@-.service (mail) is in a failed state."),
     ("Living room and bedroom satellites", "The login script luna-output.service, which forces the eMeet Luna as the default audio output, has failed on both (last run on the living room: 27 Aug). The satellites themselves run normally."),
     ("Bedroom and sky camera", "NetworkManager-wait-online.service fails at boot. Harmless unless something waits for it."),
