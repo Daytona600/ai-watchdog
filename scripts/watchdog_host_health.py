@@ -48,6 +48,12 @@ Usage:
       the old address: the nodes read these URLs, so the failure is otherwise silent
       (2026-10-09: urls.frigate_base_url pointed at a dead host for a month).
       --ignore KEY skips an entry that is known to be dead and unused.
+  watchdog_host_health.py node-literals HOST [--allow NODE_ID ...] [--nodered-port P]
+      no function / http-request / tcp node in Node-RED's LIVE flows has a private
+      IPv4 address typed into its code or URL (comments and disabled nodes are
+      ignored): every service address must come from AI_CONFIG.urls. --allow NODE_ID
+      exempts a node that cannot (the config loader needs the PostgREST address to
+      load the config in the first place).
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only
@@ -403,6 +409,40 @@ def config_urls(args):
     return bad
 
 
+_ADDR = re.compile(r"(?<![\d.])(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}"
+                   r"|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d{2,5})?(?![\d.])")
+
+
+def node_literals(args):
+    try:
+        flows = _get_json(f"http://{args.host}:{args.nodered_port}/flows", 5)
+    except Exception as e:
+        return [f"cannot read the live flows from Node-RED ({type(e).__name__}: {e})"]
+    if isinstance(flows, dict):  # Node-RED API v2 wraps the list
+        flows = flows.get("flows", [])
+    tabs = {n.get("id"): n.get("label") for n in flows if n.get("type") == "tab"}
+    allow = set(args.allow)
+    hits = []
+    for n in flows:
+        if n.get("id") in allow or n.get("d"):
+            continue
+        if n.get("type") == "function":
+            texts = [l for l in (n.get("func") or "").splitlines() if not l.strip().startswith("//")]
+        elif n.get("type") in ("http request", "tcp in", "tcp out", "tcp request", "udp in", "udp out", "websocket-client"):
+            texts = [str(n.get("url") or ""), str(n.get("host") or "")]
+        else:
+            continue
+        found = sorted({m.group(0) for t in texts for m in _ADDR.finditer(t)})
+        if found:
+            hits.append(f"{(n.get('name') or n['id']).strip()} [{tabs.get(n.get('z'))}] has {', '.join(found)}")
+    if not hits:
+        return []
+    hits.sort()
+    shown = "; ".join(hits[:6]) + ("; ..." if len(hits) > 6 else "")
+    return [f"{len(hits)} node(s) with a hard-coded address: {shown} - read it from AI_CONFIG.urls instead "
+            f"(see runbooks/node-hardcoded-address.md)"]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="mode", required=True)
@@ -428,6 +468,8 @@ def main():
     s = sub.add_parser("config-urls"); s.add_argument("host"); s.add_argument("--ignore", action="append", default=[])
     s.add_argument("--nodered-port", type=int, default=1880); s.add_argument("--pgrst-port", type=int, default=3011)
     s.set_defaults(fn=config_urls)
+    s = sub.add_parser("node-literals"); s.add_argument("host"); s.add_argument("--allow", action="append", default=[])
+    s.add_argument("--nodered-port", type=int, default=1880); s.set_defaults(fn=node_literals)
 
     args = p.parse_args()
     try:

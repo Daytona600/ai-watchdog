@@ -18,6 +18,7 @@ Node-RED	container	nodered
 Ollama	container	ollama
 Ollama Chat	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py ollama-chat ${MAIN_SERVER_IP} qwen2.5:14b --embed-model nomic-embed-text	warning
 Node-RED Config URLs	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py config-urls ${MAIN_SERVER_IP} --ignore planner_url --ignore qdrant_url	warning
+Node-RED Hard-coded Addresses	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py node-literals ${MAIN_SERVER_IP} --allow a85b476eb0cdee80	warning
 Music Assistant	http	http://${HA_SERVER_IP}:8095/info
 Kokoro TTS	container	kokoro-tts
 Parakeet STT	container	parakeet-stt
