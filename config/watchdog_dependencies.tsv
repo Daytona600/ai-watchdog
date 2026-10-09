@@ -49,3 +49,6 @@ Backup Validation	Main Server Backup	Nightly restic backup of /home, /opt and co
 Backup Validation	Z4 Backup	Nightly restic backup of the Z4's OS config, compose projects and Frigate DB to its RAID and 10.0.0.6
 Backup Validation	EPYC Backup	Nightly restic backup of the EPYC box's config, scripts and OpenCode state to the Z4 and 10.0.0.6
 Backup Validation	Skycam Backup	Daily restic backup of the sky camera's software, settings and calibration to the Z4 and 10.0.0.6
+Backup Validation	Living Room Backup	Daily restic backup of the living room satellite's voice pipeline and config to the Z4 and 10.0.0.6
+Backup Validation	Bedroom Backup	Daily restic backup of the bedroom satellite's voice pipeline and config to the Z4 and 10.0.0.6
+Backup Validation	Jellyfin Backup	Daily restic backup of the Jellyfin PC (server settings and database, kitchen satellite) to the Z4 and 10.0.0.6
