@@ -1,10 +1,11 @@
 # Backup Problem
 
-A nightly backup is failing or has not run. Three machines each keep two independent copies using restic (7 daily, 4 weekly, 3 monthly snapshots):
+A nightly backup is failing or has not run. Four machines each keep two independent copies using restic (7 daily, 4 weekly, 3 monthly snapshots):
 
 - Main server (10.0.0.35): /home/davids/backup.sh, cron 02:00, runs as root. Copies: /mnt/nas1/pop-os-backup (the Z4) and /mnt/nas2/pop-os-backup (10.0.0.6). Log: /home/davids/restic-backup.log
 - Z4 (10.0.0.60): /usr/local/sbin/host-backup, systemd host-backup.timer 03:30. Copies: /mnt/recovered/backup/z4-backup (its own RAID) and /mnt/nas2/z4-backup (10.0.0.6). Log: /var/log/host-backup.log
 - EPYC box (10.0.0.188, ssh alias apex-agent-second): host-backup, host-backup.timer 02:45. Copies: /mnt/nas1/epyc-backup (the Z4) and /mnt/nas2/epyc-backup (10.0.0.6). Log: /var/log/host-backup.log
+- Sky camera box (10.0.0.63, hostname satellite-4, ssh alias apex-agent-skycam): host-backup, host-backup.timer 10:15 every morning (so it never overlaps the night's capture or the 13:00 retention run). Copies: /mnt/nas1/skycam-backup (the Z4) and /mnt/nas2/skycam-backup (10.0.0.6). Log: /var/log/host-backup.log
 
 Home Assistant backs itself up separately to the HAbackup share on the Z4 and on 10.0.0.6 (see the HA backup stale runbook). The Z4's NAS data is mirrored to 10.0.0.6 nightly by ~/nas-backup-sync.sh.
 
@@ -15,6 +16,8 @@ See what each machine last did:
 ssh apex-agent-z4 'cat /var/lib/host-backup/status.json'
 
 ssh apex-agent-second 'cat /var/lib/host-backup/status.json'
+
+ssh apex-agent-skycam 'cat /var/lib/host-backup/status.json'
 
 cat /var/lib/host-backup/status.json
 
@@ -33,11 +36,11 @@ On the main server:
 
 sudo /home/davids/backup.sh
 
-Check every repository for corruption (Z4 and EPYC box):
+Check every repository for corruption (any machine except the main server):
 
 sudo /usr/local/sbin/host-backup --check
 
-Restore: any machine with restic and the NAS shares mounted can restore. The restic password is the same for every repository: it is in /root/.restic-password on the Z4 and the EPYC box, and inside /home/davids/backup.sh on the main server. KEEP A COPY OF THAT PASSWORD OUTSIDE THESE MACHINES (a password manager). Without it none of the backups can be opened, and the copy inside the backups themselves does not help if every machine is lost.
+Restore: any machine with restic and the NAS shares mounted can restore. The restic password is the same for every repository: it is in /root/.restic-password on the Z4, the EPYC box and the sky camera box, and inside /home/davids/backup.sh on the main server. KEEP A COPY OF THAT PASSWORD OUTSIDE THESE MACHINES (a password manager). Without it none of the backups can be opened, and the copy inside the backups themselves does not help if every machine is lost.
 
 List snapshots, then restore one file or directory to /restore:
 
@@ -50,3 +53,5 @@ Each backup also contains /var/backups/host-inventory: partition tables, RAID la
 Not backed up on purpose because it can be downloaded again: container images, Ollama models, ROCm, caches. The Z4's recordings are covered by the nightly mirror to 10.0.0.6, not by restic.
 
 Also left out on the main server (about 240 GB that can be downloaded or regenerated): the ComfyUI models (/opt/comfyui/app/data/models and text_encoders) and the micro wake word training datasets, work folder and virtualenvs (/opt/microwakeword-training/training_datasets, work, .venv, .recorder-venv). Still backed up: the trained wake word models (output/), the recorded voice samples (personal_samples/), the training tools and the ComfyUI workflows. The exclusions are in the restic command in /home/davids/backup.sh.
+
+On the sky camera box the nightly frames, anomaly captures and rendered videos (/home/david/skycam/frames, anomalies and timelapses) are not in restic: skycam-retention archives them to the Z4 and 10.0.0.6 after 12 days, and nas_sync.sh copies the daily timelapses to both. Backed up: the software in /opt/skycam and /var/lib/skycam, its settings, the dark-frame calibration, the camera stack under /usr/local and the udev rules.
