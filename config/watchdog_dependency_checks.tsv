@@ -68,6 +68,7 @@ Z4 Temps & Disks	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_
 # so junction and CPU temps are read over SSH.
 EPYC LLM Host	http	http://${EPYC_LLM_IP}:9191/metrics
 EPYC Ollama Model	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py ollama ${EPYC_LLM_IP} qwen3.6-coder
+EPYC Ollama Chat	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py ollama-chat ${EPYC_LLM_IP} qwen3.6-coder --no-think --only-if-loaded --busy-gpu-util 30 --timeout 4	warning
 EPYC OpenCode Web	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py http-up http://${EPYC_LLM_IP}:4096/ 200 401
 EPYC Fan Control	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py unit --ssh apex-agent-second ${EPYC_LLM_IP} gpu-fan-control.service
 EPYC Temps	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py sensors --ssh apex-agent-second ${EPYC_LLM_IP} --gpu-junction-warn 95 --cpu-warn 85

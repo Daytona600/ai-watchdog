@@ -14,10 +14,17 @@ Usage:
   watchdog_host_health.py ollama HOST MODEL
       Ollama answers, MODEL is installed, and if loaded it is fully on GPU
   watchdog_host_health.py ollama-chat HOST MODEL [--embed-model M] [--timeout S] [--embed-timeout S] [--port P]
+                                      [--no-think] [--only-if-loaded] [--busy-gpu-util PCT]
       a real, tiny chat request gets a sensible answer (and, with --embed-model, an
       embedding request returns a vector). The check above only lists installed and
       loaded models, so it stays green when the GPU is wedged but the API still
-      answers; this one does not. Worst case 7 s, inside the dashboard's 8 s limit.
+      answers; this one does not. For big shared models: --no-think (Qwen3-style
+      models otherwise spend the short reply on hidden thinking), --only-if-loaded
+      (skip when the model is idle instead of forcing a slow load) and
+      --busy-gpu-util PCT (a timeout is not a failure while the monitor agent shows
+      a GPU at least PCT% busy and Ollama still answers). Worst case: --timeout + 3 s
+      with --busy-gpu-util, else --timeout + --embed-timeout; keep it under the
+      dashboard's 8 s limit.
   watchdog_host_health.py http-up URL [CODE ...]
       URL answers with one of CODE (default 200) - e.g. 401 for a
       password-protected page that is up
@@ -42,6 +49,7 @@ needs editing there. Exits 0 when healthy; otherwise prints what is wrong
 import argparse
 import json
 import re
+import socket
 import subprocess
 import sys
 import time
@@ -180,18 +188,29 @@ def ollama(args):
     return []
 
 
+class _NoAnswer(RuntimeError):
+    """The request got no reply in time (as opposed to an error reply)."""
+
+
 def ollama_chat(args):
     """Send a real (tiny) chat request, and an embedding request when --embed-model is given.
 
     Added after 2026-10-08/09: a GPU lock-up left Ollama dead for 12 hours while the dashboard stayed green, because
-    its only Ollama checks were "container is running" and the model list. A model that is not loaded yet answers
-    slowly (Ollama loads it on demand), so a cold start can show up here as a timeout until the warm-up job has
-    loaded it again."""
+    its only Ollama checks were "container is running" and the model list. Options for big, shared models:
+      --no-think        send think:false (Qwen3-style models otherwise spend a short reply on hidden thinking and
+                        return empty content)
+      --only-if-loaded  do nothing if the model is not currently loaded (loading tens of GB just to test it would
+                        take far longer than a health check may, and would change what the box keeps in VRAM)
+      --busy-gpu-util N a chat that times out is not a failure while Ollama still answers /api/ps and some GPU the
+                        monitor agent reports is at least N% busy: the model is working for someone else. A locked
+                        GPU reports no load, so that case still fails.
+    A model that is not loaded yet answers slowly (Ollama loads it on demand), so a cold start can show up as a
+    timeout until the warm-up job has loaded it again."""
     base = f"http://{args.host}:{args.port}"
 
-    def post(path, payload, timeout):
-        req = urllib.request.Request(base + path, data=json.dumps(payload).encode(),
-                                     headers={"Content-Type": "application/json"})
+    def call(path, payload, timeout):  # payload None -> GET
+        data = None if payload is None else json.dumps(payload).encode()
+        req = urllib.request.Request(base + path, data=data, headers={"Content-Type": "application/json"} if data else {})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.load(resp)
@@ -202,28 +221,58 @@ def ollama_chat(args):
             except Exception:
                 pass
             raise RuntimeError(f"HTTP {e.code}" + (f" ({detail})" if detail else ""))
-        except urllib.error.URLError as e:
+        except urllib.error.URLError as e:  # urlopen wraps timeouts while waiting for the reply headers too
+            if isinstance(e.reason, (TimeoutError, socket.timeout)):
+                raise _NoAnswer(f"no answer within {timeout:g}s")
             raise RuntimeError(f"no answer ({e.reason})")
-        except OSError as e:  # read timeout, connection reset in the middle of the reply, ...
-            raise RuntimeError(f"no answer within {timeout:g}s ({type(e).__name__})")
+        except (TimeoutError, socket.timeout):
+            raise _NoAnswer(f"no answer within {timeout:g}s")
+        except OSError as e:  # connection reset in the middle of the reply, ...
+            raise RuntimeError(f"no answer ({type(e).__name__})")
         except ValueError:
             raise RuntimeError("the reply was not valid JSON")
 
+    def gpus_busy(threshold):
+        try:
+            with urllib.request.urlopen(f"http://{args.host}:{AGENT_PORT}/metrics", timeout=1.5) as resp:
+                gpus = json.load(resp).get("gpus") or []
+        except Exception:
+            return False
+        return any((g.get("util_pct") or 0) >= threshold for g in gpus)
+
+    def is_loaded(names):
+        return any(n == args.model or n.startswith(args.model + ":") or n.split(":")[0] == args.model for n in names)
+
+    if args.only_if_loaded or args.busy_gpu_util is not None:
+        try:
+            loaded = [m.get("name", "") for m in call("/api/ps", None, 1.5).get("models", [])]
+        except RuntimeError as e:
+            return [f"cannot ask Ollama what is loaded: {e}"]
+        if args.only_if_loaded and not is_loaded(loaded):
+            return []  # idle: the API answers and the model is simply not in VRAM right now
+
     problems = []
+    payload = {"model": args.model, "stream": False,
+               "messages": [{"role": "user", "content": "Reply with the single word OK."}],
+               "options": {"num_predict": 8, "temperature": 0}}
+    if args.no_think:
+        payload["think"] = False
     try:
-        data = post("/api/chat", {"model": args.model, "stream": False,
-                                  "messages": [{"role": "user", "content": "Reply with the single word OK."}],
-                                  "options": {"num_predict": 8, "temperature": 0}}, args.timeout)
+        data = call("/api/chat", payload, args.timeout)
         reply = str((data.get("message") or {}).get("content") or "").strip()
         if not reply:
             problems.append(f"{args.model} chat answered with nothing")
         elif not re.search(r"\bok(ay)?\b", reply, re.I):
             problems.append(f"{args.model} chat answered something odd: {reply[:30]!r}")
+    except _NoAnswer as e:
+        # It answered /api/ps a moment ago, so the server is alive; with a GPU busy it is working on another request.
+        if not (args.busy_gpu_util is not None and gpus_busy(args.busy_gpu_util)):
+            problems.append(f"{args.model} chat failed: {e}")
     except RuntimeError as e:
         problems.append(f"{args.model} chat failed: {e}")
     if args.embed_model:
         try:
-            data = post("/api/embeddings", {"model": args.embed_model, "prompt": "hello"}, args.embed_timeout)
+            data = call("/api/embeddings", {"model": args.embed_model, "prompt": "hello"}, args.embed_timeout)
             if not data.get("embedding"):
                 problems.append(f"{args.embed_model} embedding came back empty")
         except RuntimeError as e:
@@ -316,7 +365,9 @@ def main():
     s = sub.add_parser("ollama"); s.add_argument("host"); s.add_argument("model"); s.set_defaults(fn=ollama)
     s = sub.add_parser("ollama-chat"); s.add_argument("host"); s.add_argument("model"); s.add_argument("--embed-model")
     s.add_argument("--timeout", type=float, default=5.0); s.add_argument("--embed-timeout", type=float, default=2.0)
-    s.add_argument("--port", type=int, default=11434); s.set_defaults(fn=ollama_chat)
+    s.add_argument("--port", type=int, default=11434); s.add_argument("--no-think", action="store_true")
+    s.add_argument("--only-if-loaded", action="store_true"); s.add_argument("--busy-gpu-util", type=float)
+    s.set_defaults(fn=ollama_chat)
     s = sub.add_parser("http-up"); s.add_argument("url"); s.add_argument("codes", nargs="*"); s.set_defaults(fn=http_up)
     s = sub.add_parser("backup"); s.add_argument("--ssh"); s.add_argument("host", nargs="?")
     s.add_argument("--max-age-hours", type=float, default=50); s.set_defaults(fn=backup)
