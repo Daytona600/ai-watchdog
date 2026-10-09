@@ -1,0 +1,239 @@
+  :root {
+    --bg: #f6f4f0;
+    --surface: #ffffff;
+    --surface-2: #efece6;
+    --text: #2a2724;
+    --muted: #6b645c;
+    --accent: #b5651d;
+    --accent-soft: #f0dfc9;
+    --border: #e0dbd3;
+    --warn-bg: #fbeee0;
+    --warn-text: #8a4b0f;
+    --warn-border: #e3c093;
+    --ok-dot: #5c7a4f;
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1a17;
+    --surface: #252220;
+    --surface-2: #2c2925;
+    --text: #eae6e0;
+    --muted: #9a938a;
+    --accent: #d68a3f;
+    --accent-soft: #3a2c1a;
+    --border: #3a3530;
+    --warn-bg: #362a1a;
+    --warn-text: #e3ab63;
+    --warn-border: #5a3f1f;
+    --ok-dot: #8fae7e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17;
+      --surface: #252220;
+      --surface-2: #2c2925;
+      --text: #eae6e0;
+      --muted: #9a938a;
+      --accent: #d68a3f;
+      --accent-soft: #3a2c1a;
+      --border: #3a3530;
+      --warn-bg: #362a1a;
+      --warn-text: #e3ab63;
+      --warn-border: #5a3f1f;
+      --ok-dot: #8fae7e;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 2.5rem 1.5rem 5rem;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .mono { font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+
+  header.page {
+    margin-bottom: 2.5rem;
+  }
+  header.page h1 {
+    font-size: 1.7rem;
+    margin: 0 0 0.35rem;
+    text-wrap: balance;
+  }
+  header.page .sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  nav.jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+  }
+  nav.jump a {
+    font-size: 0.82rem;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  nav.jump a:hover { border-color: var(--accent); color: var(--accent); }
+
+  section { margin-bottom: 2.75rem; scroll-margin-top: 1rem; }
+  h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .role {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* summary table */
+  .summary-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table.summary { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  table.summary th, table.summary td {
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  table.summary th {
+    background: var(--surface-2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  table.summary tr:last-child td { border-bottom: none; }
+  table.summary td.host { font-weight: 600; }
+  table.summary td .ip { color: var(--muted); font-size: 0.8rem; display: block; }
+
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  .spec {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+  }
+  .spec .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .spec .value { font-size: 0.92rem; font-weight: 600; }
+  .spec .value.mono { font-weight: 500; font-size: 0.85rem; }
+
+  .subhead {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 1.1rem 0 0.5rem;
+  }
+
+  table.detail { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  table.detail th, table.detail td {
+    text-align: left;
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.detail th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+  table.detail tr:last-child td { border-bottom: none; }
+  .status-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ok-dot);
+    margin-right: 0.4rem;
+  }
+  .status-dot.stopped { background: var(--muted); }
+  .status-dot.stale { background: var(--warn-text); }
+
+  ul.svc-list, ul.plain {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+  }
+  ul.svc-list li, ul.plain li { margin-bottom: 0.3rem; }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.05rem 0.45rem;
+    border-radius: 5px;
+    margin-left: 0.4rem;
+  }
+
+  .note {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-top: 0.6rem;
+  }
+
+  .flag-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .flag {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+  }
+  .flag .where {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--warn-text);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .flag .what { font-size: 0.9rem; margin-bottom: 0.15rem; }
+  .flag .why { font-size: 0.82rem; color: var(--muted); }
+
+  .corrected {
+    font-size: 0.82rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    margin-top: 0.75rem;
+  }
+  .corrected b { color: var(--text); }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* long model names, kernel strings and mount lists must wrap instead of widening the page on a phone */
+  .spec { min-width: 0; }
+  .spec .value, .note, ul.svc-list li, .flag .what, h2 .role { overflow-wrap: anywhere; word-break: break-word; }
+  .tablewrap { overflow-x: auto; }
+  table.detail td.muted { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+  table.detail thead th { border-bottom: 1px solid var(--border); }
