@@ -13,6 +13,11 @@ Usage:
       a systemd unit is active
   watchdog_host_health.py ollama HOST MODEL
       Ollama answers, MODEL is installed, and if loaded it is fully on GPU
+  watchdog_host_health.py ollama-chat HOST MODEL [--embed-model M] [--timeout S] [--embed-timeout S] [--port P]
+      a real, tiny chat request gets a sensible answer (and, with --embed-model, an
+      embedding request returns a vector). The check above only lists installed and
+      loaded models, so it stays green when the GPU is wedged but the API still
+      answers; this one does not. Worst case 7 s, inside the dashboard's 8 s limit.
   watchdog_host_health.py http-up URL [CODE ...]
       URL answers with one of CODE (default 200) - e.g. 401 for a
       password-protected page that is up
@@ -39,6 +44,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -174,6 +180,57 @@ def ollama(args):
     return []
 
 
+def ollama_chat(args):
+    """Send a real (tiny) chat request, and an embedding request when --embed-model is given.
+
+    Added after 2026-10-08/09: a GPU lock-up left Ollama dead for 12 hours while the dashboard stayed green, because
+    its only Ollama checks were "container is running" and the model list. A model that is not loaded yet answers
+    slowly (Ollama loads it on demand), so a cold start can show up here as a timeout until the warm-up job has
+    loaded it again."""
+    base = f"http://{args.host}:{args.port}"
+
+    def post(path, payload, timeout):
+        req = urllib.request.Request(base + path, data=json.dumps(payload).encode(),
+                                     headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.load(resp)
+        except urllib.error.HTTPError as e:  # before URLError: HTTPError is a subclass of it
+            detail = ""
+            try:
+                detail = str(json.load(e).get("error") or "")[:80]
+            except Exception:
+                pass
+            raise RuntimeError(f"HTTP {e.code}" + (f" ({detail})" if detail else ""))
+        except urllib.error.URLError as e:
+            raise RuntimeError(f"no answer ({e.reason})")
+        except OSError as e:  # read timeout, connection reset in the middle of the reply, ...
+            raise RuntimeError(f"no answer within {timeout:g}s ({type(e).__name__})")
+        except ValueError:
+            raise RuntimeError("the reply was not valid JSON")
+
+    problems = []
+    try:
+        data = post("/api/chat", {"model": args.model, "stream": False,
+                                  "messages": [{"role": "user", "content": "Reply with the single word OK."}],
+                                  "options": {"num_predict": 8, "temperature": 0}}, args.timeout)
+        reply = str((data.get("message") or {}).get("content") or "").strip()
+        if not reply:
+            problems.append(f"{args.model} chat answered with nothing")
+        elif not re.search(r"\bok(ay)?\b", reply, re.I):
+            problems.append(f"{args.model} chat answered something odd: {reply[:30]!r}")
+    except RuntimeError as e:
+        problems.append(f"{args.model} chat failed: {e}")
+    if args.embed_model:
+        try:
+            data = post("/api/embeddings", {"model": args.embed_model, "prompt": "hello"}, args.embed_timeout)
+            if not data.get("embedding"):
+                problems.append(f"{args.embed_model} embedding came back empty")
+        except RuntimeError as e:
+            problems.append(f"{args.embed_model} embedding failed: {e}")
+    return problems
+
+
 def http_up(args):
     codes = {int(c) for c in args.codes} or {200}
     try:
@@ -257,6 +314,9 @@ def main():
     s.set_defaults(fn=sensors)
     s = sub.add_parser("unit"); s.add_argument("--ssh", required=True); s.add_argument("host"); s.add_argument("unit"); s.set_defaults(fn=unit)
     s = sub.add_parser("ollama"); s.add_argument("host"); s.add_argument("model"); s.set_defaults(fn=ollama)
+    s = sub.add_parser("ollama-chat"); s.add_argument("host"); s.add_argument("model"); s.add_argument("--embed-model")
+    s.add_argument("--timeout", type=float, default=5.0); s.add_argument("--embed-timeout", type=float, default=2.0)
+    s.add_argument("--port", type=int, default=11434); s.set_defaults(fn=ollama_chat)
     s = sub.add_parser("http-up"); s.add_argument("url"); s.add_argument("codes", nargs="*"); s.set_defaults(fn=http_up)
     s = sub.add_parser("backup"); s.add_argument("--ssh"); s.add_argument("host", nargs="?")
     s.add_argument("--max-age-hours", type=float, default=50); s.set_defaults(fn=backup)
