@@ -51,9 +51,9 @@ Usage:
   watchdog_host_health.py node-literals HOST [--allow NODE_ID ...] [--nodered-port P]
       no function / http-request / tcp node in Node-RED's LIVE flows has a private
       IPv4 address typed into its code or URL (comments and disabled nodes are
-      ignored): every service address must come from AI_CONFIG.urls. --allow NODE_ID
-      exempts a node that cannot (the config loader needs the PostgREST address to
-      load the config in the first place).
+      ignored): every service address must come from AI_CONFIG.urls (the config loader
+      reads its one bootstrap address from the container's PGRST_URL variable).
+      --allow NODE_ID can still exempt a node, but none is exempt today.
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only

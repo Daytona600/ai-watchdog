@@ -20,5 +20,6 @@ The check names the node, its tab and the address. Fix it like this:
 4. Nodes that can run at deploy, before the config has loaded, should first wait for it:
    `await __cfgReady();` (see "Fetch HA entity template").
 
-The one exemption is "Set AI global config -v2" (id a85b476eb0cdee80): it needs the PostgREST address to load the config at all.
-It is listed with --allow on the check's line in config/watchdog_dependency_checks.tsv.
+There are no exemptions. The config loader ("Set AI global config -v2") needs the PostgREST address to load the config at all,
+so that one address comes from the Node-RED container's environment (PGRST_URL in /home/davids/node-red/docker-compose.yml),
+not from a literal in the flow. If the check ever flags the loader, someone typed the address back in: use env.get("PGRST_URL").

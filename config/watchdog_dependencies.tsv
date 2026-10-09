@@ -20,7 +20,7 @@ Node-RED	Home Assistant API	Sends actions and reads HA state
 Node-RED	Ollama	LLM fallback/classification/planning
 Node-RED	Ollama Chat	The LLM really answers a chat and an embedding request, not just 'the container is up'
 Node-RED	Node-RED Config URLs	Every address in AI_CONFIG.urls answers - a stale one fails silently in the nodes that use it
-Node-RED	Node-RED Hard-coded Addresses	No service address is typed into a node - they all come from AI_CONFIG.urls (the config loader is the one exemption)
+Node-RED	Node-RED Hard-coded Addresses	No service address is typed into a node - they all come from AI_CONFIG.urls (the config loader gets its PostgREST address from the container's PGRST_URL variable)
 Node-RED	Kokoro TTS	TTS voice output (David/Mary via VOICE_OVERRIDES)
 Node-RED	Parakeet STT	Local satellite STT path
 Node-RED	Music Assistant	Music playback/search
