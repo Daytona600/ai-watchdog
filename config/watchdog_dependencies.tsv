@@ -45,3 +45,6 @@ Backup Validation	GitHub Repo	Checks committed/pushed state
 Backup Validation	Home Assistant API	Checks HA backup sensors
 Backup Validation	Node-RED	Exports sanitized live flow
 Backup Validation	Watchdog Config	Builds safe config tarball
+Backup Validation	Main Server Backup	Nightly restic backup of /home, /opt and configs to the Z4 and 10.0.0.6
+Backup Validation	Z4 Backup	Nightly restic backup of the Z4's OS config, compose projects and Frigate DB to its RAID and 10.0.0.6
+Backup Validation	EPYC Backup	Nightly restic backup of the EPYC box's config, scripts and OpenCode state to the Z4 and 10.0.0.6

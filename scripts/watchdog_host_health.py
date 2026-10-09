@@ -16,6 +16,12 @@ Usage:
   watchdog_host_health.py http-up URL [CODE ...]
       URL answers with one of CODE (default 200) - e.g. 401 for a
       password-protected page that is up
+  watchdog_host_health.py backup [--ssh ALIAS HOST] [--max-age-hours N]
+      every repository in the machine's nightly restic backup status file
+      (/var/lib/host-backup/status.json, written by host-backup or, on the main
+      server, by backup.sh) has a good run within N hours (default 50, so one
+      missed night is tolerated but two in a row are not). Without --ssh it reads
+      the local file.
   watchdog_host_health.py dns HOST [--name N] [--same-as REF_HOST [--same-name N2]]
       HOST answers a DNS lookup (default example.com). With --same-as it must
       also give the same answer as REF_HOST for N2 (default ha.magnumz.com, the
@@ -35,6 +41,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
@@ -177,6 +184,35 @@ def http_up(args):
     return [] if code in codes else [f"HTTP {code} (expected {'/'.join(map(str, sorted(codes)))})"]
 
 
+BACKUP_STATUS = "/var/lib/host-backup/status.json"
+
+
+def backup(args):
+    if args.ssh and not args.host:
+        return ["backup --ssh needs a HOST"]
+    try:
+        raw = _ssh(args.ssh, args.host, f"cat {BACKUP_STATUS}") if args.ssh else Path(BACKUP_STATUS).read_text()
+        data = json.loads(raw)
+    except Exception as e:
+        return [f"cannot read the backup status file ({type(e).__name__}: {e})"]
+    repos = data.get("repos") or []
+    if not repos:
+        return ["the backup status file lists no repositories"]
+    now = datetime.now(timezone.utc)
+    problems = []
+    for r in repos:
+        name, last, err = r.get("path", "?"), r.get("last_success"), r.get("error")
+        try:
+            age_h = (now - datetime.fromisoformat(last)).total_seconds() / 3600 if last else None
+        except (ValueError, TypeError):
+            age_h = None
+        if age_h is None:
+            problems.append(f"{name}: no successful backup on record" + (f" (latest run: {err})" if err else ""))
+        elif age_h > args.max_age_hours:
+            problems.append(f"{name}: last good backup {age_h:.0f}h ago" + (f" - latest run: {err}" if err else ""))
+    return problems
+
+
 def _dig(server, name, timeout=2):
     """Sorted IPv4 answers from SERVER for NAME; None when the server gives no reply at all."""
     try:
@@ -222,6 +258,8 @@ def main():
     s = sub.add_parser("unit"); s.add_argument("--ssh", required=True); s.add_argument("host"); s.add_argument("unit"); s.set_defaults(fn=unit)
     s = sub.add_parser("ollama"); s.add_argument("host"); s.add_argument("model"); s.set_defaults(fn=ollama)
     s = sub.add_parser("http-up"); s.add_argument("url"); s.add_argument("codes", nargs="*"); s.set_defaults(fn=http_up)
+    s = sub.add_parser("backup"); s.add_argument("--ssh"); s.add_argument("host", nargs="?")
+    s.add_argument("--max-age-hours", type=float, default=50); s.set_defaults(fn=backup)
     s = sub.add_parser("dns"); s.add_argument("host"); s.add_argument("--name", default="example.com")
     s.add_argument("--same-as"); s.add_argument("--same-name", default="ha.magnumz.com"); s.set_defaults(fn=dns)
 
