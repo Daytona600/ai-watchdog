@@ -48,3 +48,5 @@ sudo restic -r /mnt/nas2/z4-backup --password-file /root/.restic-password restor
 Each backup also contains /var/backups/host-inventory: partition tables, RAID layout, installed packages, enabled services, Docker, GPU and BMC settings, the list of Ollama models to re-download, and consistent copies of the live SQLite databases (Frigate, OpenCode). RESTORE-NOTES.txt in that folder walks through a full rebuild.
 
 Not backed up on purpose because it can be downloaded again: container images, Ollama models, ROCm, caches. The Z4's recordings are covered by the nightly mirror to 10.0.0.6, not by restic.
+
+Also left out on the main server (about 240 GB that can be downloaded or regenerated): the ComfyUI models (/opt/comfyui/app/data/models and text_encoders) and the micro wake word training datasets, work folder and virtualenvs (/opt/microwakeword-training/training_datasets, work, .venv, .recorder-venv). Still backed up: the trained wake word models (output/), the recorded voice samples (personal_samples/), the training tools and the ComfyUI workflows. The exclusions are in the restic command in /home/davids/backup.sh.
