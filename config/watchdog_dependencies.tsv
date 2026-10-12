@@ -28,6 +28,8 @@ Node-RED	Frigate	Camera/security state and events
 Node-RED	SearXNG	Web search/answer tool
 Node-RED	Local MCP Agent	MCP tool-calling capability
 
+SearXNG	Internet	Web search answers come from outside search engines
+
 Voice Assistant	Home Assistant API	Assist pipeline and entity control
 Voice Assistant	Node-RED	Voice routing and intent bridge
 Voice Assistant	Parakeet STT	STT for local satellites

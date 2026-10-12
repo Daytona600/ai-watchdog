@@ -11,6 +11,10 @@ ai-watchdog-web	http	http://127.0.0.1:8098/dashboard.html
 AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer	critical
 AI Watchdog Master	systemd-user-timer	ai-watchdog.timer	critical
 
+# Real internet: router -> Starlink dish -> public IPs -> AdGuard upstream -> HTTPS. Names the first broken link.
+# Every other row only looks inside the house (2026-10-11: Starlink dropped and the whole page stayed green).
+Internet	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py internet --router ${ROUTER_IP} --dish ${STARLINK_DISH_IP} --dns ${MAIN_SERVER_IP}	critical
+
 Docker	command	docker ps	critical
 Home Assistant API	command	bash -lc 'source /home/davids/ai-watchdog/config/ha_token.env && curl -fsS -H "Authorization: Bearer $HA_TOKEN" "$HA_BASE_URL/api/" >/dev/null'	critical
 Frigate API	http	http://${FRIGATE_HOST_IP}:5000/api/stats

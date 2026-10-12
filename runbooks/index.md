@@ -13,3 +13,4 @@ Manual recovery notes for common watchdog alerts.
 - Backup problem (restic, three machines): backup-problem.html
 - Node-RED config URL stale: config-url-stale.html
 - Node-RED hard-coded address: node-hardcoded-address.html
+- Internet down (router / Starlink / DNS): internet-down.html

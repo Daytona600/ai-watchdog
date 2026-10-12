@@ -54,6 +54,15 @@ Usage:
       ignored): every service address must come from AI_CONFIG.urls (the config loader
       reads its one bootstrap address from the container's PGRST_URL variable).
       --allow NODE_ID can still exempt a node, but none is exempt today.
+  watchdog_host_health.py internet --router IP --dish IP --dns IP
+      the house really reaches the internet, walking the chain router -> Starlink dish
+      -> public IPs (1.1.1.1, 8.8.8.8) -> DNS through AdGuard (a never-cached name, so a
+      dead upstream can't hide behind the cache) -> a real HTTPS fetch. All probes run at
+      once (about 4 s worst case) and the FIRST broken link is reported with what to do.
+      Every other check only looks inside the house, so a Starlink drop left the whole
+      dashboard green (2026-10-11). If this host has no route to the dish (a Docker
+      network covering 192.168.96.0/20 swallows 192.168.100.1) the dish step is skipped
+      and said so.
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only
@@ -450,6 +459,89 @@ def node_literals(args):
             f"(see runbooks/node-hardcoded-address.md)"]
 
 
+INTERNET_IPS = ("1.1.1.1", "8.8.8.8")
+
+
+def _ping(host):
+    """True when HOST answers at least one of two pings within about a second."""
+    try:
+        return subprocess.run(["ping", "-c", "2", "-i", "0.3", "-W", "1", "-q", host],
+                              capture_output=True, timeout=4).returncode == 0
+    except subprocess.TimeoutExpired:
+        return False
+
+
+def _routed_via(host, gateway):
+    """True when the kernel sends HOST's traffic through GATEWAY (not into a local Docker bridge)."""
+    try:
+        out = subprocess.run(["ip", "route", "get", host], capture_output=True, text=True, timeout=2).stdout
+    except Exception:
+        return True  # can't tell: try the ping anyway
+    return f"via {gateway} " in out
+
+
+def _dns_status(server, name, timeout=2):
+    """dig's status (NOERROR / NXDOMAIN / SERVFAIL / ...) from SERVER for NAME; None when nothing answered."""
+    try:
+        r = subprocess.run(["dig", f"@{server}", f"+time={timeout}", "+tries=1", name, "A"],
+                           capture_output=True, text=True, timeout=timeout + 3)
+    except FileNotFoundError:
+        raise RuntimeError("dig is not installed on the watchdog host")
+    except subprocess.TimeoutExpired:
+        return None
+    m = re.search(r"status: (\w+)", r.stdout)
+    return m.group(1) if m else None
+
+
+def _https_ok(url, timeout=4):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ai-watchdog/1.0"}), timeout=timeout) as r:
+            return None if r.status < 400 else f"HTTP {r.status}"
+    except urllib.error.HTTPError as e:
+        return None if e.code < 400 else f"HTTP {e.code}"
+    except Exception as e:
+        return str(getattr(e, "reason", e))
+
+
+def internet(args):
+    dish_routed = _routed_via(args.dish, args.router)
+    # a random name is never in AdGuard's cache, so only a working upstream can answer it (NXDOMAIN is a fine answer)
+    probe_name = f"wd-{int(time.time() * 1000) % 10**9}.example.com"
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+        f_router = ex.submit(_ping, args.router)
+        f_dish = ex.submit(_ping, args.dish) if dish_routed else None
+        f_ips = [ex.submit(_ping, ip) for ip in INTERNET_IPS]
+        f_dns = ex.submit(_dns_status, args.dns, probe_name)
+        f_https = ex.submit(_https_ok, args.https_url)
+    router_ok = f_router.result()
+    dish_ok = f_dish.result() if f_dish else None
+    ips_ok = any(f.result() for f in f_ips)
+    dns_status, https_err = f_dns.result(), f_https.result()
+    see = " (runbooks/internet-down.md)"
+
+    if not router_ok:
+        return [f"STEP 1/5 ROUTER: the router ({args.router}) does not answer - power-cycle the router" + see]
+    if not ips_ok:
+        if dish_ok is True:
+            return [f"STEP 3/5 STARLINK: the router and the dish ({args.dish}) answer but nothing on the internet does - "
+                    f"the dish has lost its satellite link (open the Starlink app: offline / obstructed / searching?). "
+                    f"Unplug the Starlink power supply for 30 s" + see]
+        if dish_ok is False:
+            return [f"STEP 2/5 DISH: the router answers but the Starlink dish ({args.dish}) does not - dish is hung, "
+                    f"booting or unpowered, or the router-to-dish cable is loose. Unplug the Starlink power supply for "
+                    f"30 s, then the router" + see]
+        return [f"STEP 3/5 STARLINK OR ROUTER: the router answers but nothing on the internet does (dish not checkable from "
+                f"here: no route to {args.dish}). Unplug the Starlink power supply for 30 s, then the router" + see]
+    if dns_status not in ("NOERROR", "NXDOMAIN"):
+        what = "did not answer" if dns_status is None else f"answered {dns_status}"
+        return [f"STEP 4/5 DNS: the internet works (1.1.1.1 / 8.8.8.8 answer) but AdGuard on {args.dns} {what} for a fresh "
+                f"name - its upstream DNS servers are unreachable or AdGuard is stuck: docker restart adguardhome" + see]
+    if https_err:
+        return [f"STEP 5/5 WEB: IPs and DNS work but {args.https_url} fails ({https_err}) - likely a Starlink "
+                f"or wider outage; check status.starlink.com from a phone on cellular" + see]
+    return []
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="mode", required=True)
@@ -477,6 +569,9 @@ def main():
     s.set_defaults(fn=config_urls)
     s = sub.add_parser("node-literals"); s.add_argument("host"); s.add_argument("--allow", action="append", default=[])
     s.add_argument("--nodered-port", type=int, default=1880); s.set_defaults(fn=node_literals)
+    s = sub.add_parser("internet"); s.add_argument("--router", required=True); s.add_argument("--dish", required=True)
+    s.add_argument("--dns", required=True); s.add_argument("--https-url", default="https://www.google.com/generate_204")
+    s.set_defaults(fn=internet)
 
     args = p.parse_args()
     try:
