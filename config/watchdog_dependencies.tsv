@@ -28,6 +28,7 @@ Node-RED	Frigate	Camera/security state and events
 Node-RED	SearXNG	Web search/answer tool
 Node-RED	Local MCP Agent	MCP tool-calling capability
 
+Internet	AI Watchdog Internet Timer	Re-runs this check every 2 minutes; without it the row is only refreshed every 6 hours
 SearXNG	Internet	Web search answers come from outside search engines
 
 Voice Assistant	Home Assistant API	Assist pipeline and entity control

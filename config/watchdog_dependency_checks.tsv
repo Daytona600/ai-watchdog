@@ -10,6 +10,7 @@
 ai-watchdog-web	http	http://127.0.0.1:8098/dashboard.html
 AI Watchdog Heartbeat	systemd-user-timer	ai-watchdog-heartbeat.timer	critical
 AI Watchdog Master	systemd-user-timer	ai-watchdog.timer	critical
+AI Watchdog Internet Timer	systemd-user-timer	ai-watchdog-internet.timer	warning
 
 # Real internet: router -> Starlink dish -> public IPs -> AdGuard upstream -> HTTPS. Names the first broken link.
 # Every other row only looks inside the house (2026-10-11: Starlink dropped and the whole page stayed green).
