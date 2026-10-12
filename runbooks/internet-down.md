@@ -32,9 +32,13 @@ Run the check by hand:
 
 python3 ~/ai-watchdog/scripts/watchdog_host_health.py internet --router 10.0.0.1 --dish 192.168.100.1 --dns 10.0.0.35
 
+The row is refreshed every 2 minutes by the user timer ai-watchdog-internet (units in systemd/, installed in
+~/.config/systemd/user/); the "AI Watchdog Internet Timer" row goes yellow if that timer stops. If the tile's
+"(checked HH:MM)" time is old, check: systemctl --user status ai-watchdog-internet.timer
+
 Dish not checkable from the server: the Docker network parakeet_default took 192.168.96.0/20, which contains the dish's
-192.168.100.1, so the server sends dish traffic into Docker. Fix with a one-address route through the router
-(Parakeet keeps working; it only uses 192.168.96.2):
+192.168.100.1, so the server sends dish traffic into Docker. A one-address route through the router fixes it (added
+2026-10-11 and saved in NetworkManager; Parakeet keeps working, it only uses 192.168.96.2). If it is ever lost:
 
 sudo ip route add 192.168.100.1/32 via 10.0.0.1 dev enp3s0
 sudo nmcli con modify "Wired connection 1" +ipv4.routes "192.168.100.1/32 10.0.0.1"
