@@ -107,17 +107,32 @@ for row in read_tsv(DEPENDENCIES):
 DEFAULT_SEVERITY = "warning"
 VALID_SEVERITIES = ("info", "warning", "critical")
 
+# --only NAME [NAME ...]: re-run just those checks and keep every other result from the last full run
+# (ai-watchdog-internet.timer refreshes the Internet row every 2 minutes this way).
+ONLY = set(sys.argv[sys.argv.index("--only") + 1:]) if "--only" in sys.argv else None
+previous = {}
+if ONLY:
+    try:
+        previous = json.loads((PUBLIC / "dependencies.json").read_text())
+    except Exception:
+        previous = {}
+
 checks = {}
 for row in read_tsv(CHECKS):
     if len(row) < 3:
         continue
     name, kind, target = row[0].strip(), row[1].strip(), row[2].strip()
+    if ONLY and name not in ONLY and name in previous.get("checks", {}):
+        checks[name] = previous["checks"][name]
+        continue
     target = watchdog_hosts.expand(target)
     severity = row[3].strip() if len(row) >= 4 and row[3].strip() else DEFAULT_SEVERITY
     if severity not in VALID_SEVERITIES:
         severity = DEFAULT_SEVERITY
     ok, detail = check_one(kind, target)
     checks[name] = {"ok": ok, "type": kind, "target": target, "detail": detail, "severity": severity}
+    if ONLY:
+        checks[name]["checked"] = datetime.now().astimezone().isoformat(timespec="seconds")
 
 service_rows = []
 for service in sorted(services):
@@ -130,6 +145,8 @@ for service in sorted(services):
     if check:
         status = "ok" if check["ok"] else "attention"
         detail = check["detail"]
+        if check.get("checked"):
+            detail += f" (checked {check['checked'][11:16]})"
         severity = check["severity"]
     service_rows.append({
         "service": service,
@@ -147,14 +164,18 @@ summary = {
 }
 
 data = {
-    "updated": datetime.now().astimezone().isoformat(timespec="seconds"),
+    # a partial run keeps the full run's time, so "Updated" still says when everything was last checked
+    "updated": previous.get("updated") or datetime.now().astimezone().isoformat(timespec="seconds"),
     "summary": summary,
     "dependencies": deps,
     "checks": checks,
     "services": service_rows,
 }
 
-(PUBLIC / "dependencies.json").write_text(json.dumps(data, indent=2) + "\n")
+# write-then-rename: the 2-minute partial run and the full run must never leave a half-written file for the dashboard
+tmp = PUBLIC / "dependencies.json.tmp"
+tmp.write_text(json.dumps(data, indent=2) + "\n")
+tmp.replace(PUBLIC / "dependencies.json")
 
 def badge(status, severity):
     if status == "ok":
@@ -202,7 +223,7 @@ html_doc = f"""<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="300">
+  <meta http-equiv="refresh" content="120">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Watchdog Dependencies</title>
   <style>
@@ -267,7 +288,7 @@ html_doc = f"""<!doctype html>
 <body>
   <div class="top">
     <h1>AI Watchdog Dependency Map</h1>
-    <div class="muted">Updated: {html.escape(updated)} · Auto-refreshes every 5 minutes</div>
+    <div class="muted">Updated: {html.escape(updated)} · Auto-refreshes every 2 minutes</div>
     <p>
       <a href="dashboard.html">Watchdog Dashboard</a> ·
       <a href="dependencies.json">Dependency JSON</a> ·

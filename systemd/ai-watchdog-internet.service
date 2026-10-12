@@ -1,0 +1,7 @@
+[Unit]
+Description=AI Watchdog internet check (router / Starlink / DNS) for the dashboard tile
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'python3 /home/davids/ai-watchdog/scripts/watchdog_dependencies_v1.py --only Internet >/dev/null && /home/davids/ai-watchdog/scripts/watchdog_dashboard_v1.sh >/dev/null'
+TimeoutStartSec=60

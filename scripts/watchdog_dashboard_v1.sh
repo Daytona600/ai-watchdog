@@ -260,7 +260,7 @@ html_doc = f"""<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="300">
+  <meta http-equiv="refresh" content="120">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Watchdog Dashboard</title>
   <style>
@@ -380,7 +380,7 @@ html_doc = f"""<!doctype html>
     {status_badge(overall_status, overall_cls)}
   </div>
   <div class="stat-line">
-    Updated {esc(updated)} &middot; auto-refreshes every 5 minutes &middot;
+    Updated {esc(updated)} &middot; auto-refreshes every 2 minutes &middot;
     <strong>{data['service_count']}</strong> services checked
     (<strong>{data['service_attention_count']}</strong> need attention) &middot;
     <strong>{data['critical_count']}</strong> critical &middot;
