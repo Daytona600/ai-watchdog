@@ -14,3 +14,4 @@ NAS	NAS issue. Check ping, mount status, df usage, and whether the expected NAS 
 HA backup	HA backup issue. Check HA backup sensors first; HAOS writes backups directly, so main-server NAS file scans may not apply.
 unavailable	HA entity unavailable. Check device power/battery first, then integration status, then network/mesh route.
 unknown	HA entity unknown. Check integration state, template sensors, and whether the entity was renamed.
+Netdata	Netdata alert. Open http://10.0.0.188:19999 for the machine named in the detail; runbooks/netdata-alert.md lists what each alert means.

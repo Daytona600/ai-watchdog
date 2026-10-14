@@ -63,6 +63,18 @@ Usage:
       dashboard green (2026-10-11). If this host has no route to the dish (a Docker
       network covering 192.168.96.0/20 swallows 192.168.100.1) the dish step is skipped
       and said so.
+  watchdog_host_health.py netdata-nodes PARENT --nodes N1,N2,... [--port P]
+      every listed host is streaming live metrics to the Netdata parent (the EPYC box).
+      A host that stops streaming has hung, rebooted or lost its network - the parent
+      sees it within seconds, including the ones nothing else here pings. If the
+      parent itself does not answer, that is the failure.
+  watchdog_host_health.py netdata-alerts PARENT --nodes N1,N2,... [--ignore NAME ...] [--port P]
+      no WARNING/CRITICAL alert is raised on the Netdata parent for any listed host:
+      Netdata's own alerts (ECC memory errors, OOM kills, IPMI events, RAID, disk
+      fill, ...) plus the home_* ones in /etc/netdata/health.d/home.conf on the parent
+      (SMART sectors, PCIe fatal errors, failed systemd services). Netdata's own
+      notifications are off, so this check is how they reach the dashboard and HA.
+      --ignore NAME skips an alert by name. See runbooks/netdata-alert.md.
 
 SSH uses the main server's alias (which carries user and key) with the IP
 taken from watchdog_known_hosts.conf via -o HostName, so an IP change only
@@ -542,6 +554,33 @@ def internet(args):
     return []
 
 
+def netdata_nodes(args):
+    nodes = {n.get("nm"): n.get("state") for n in _get_json(f"http://{args.parent}:{args.port}/api/v2/nodes", 5).get("nodes", [])}
+    problems = []
+    for name in args.nodes.split(","):
+        state = nodes.get(name)
+        if state is None:
+            problems.append(f"{name} has never streamed to the Netdata parent")
+        elif state != "reachable":
+            problems.append(f"{name} stopped streaming to Netdata ({state}) - host hung, rebooted or off the network?")
+    return problems
+
+
+def netdata_alerts(args):
+    problems = []
+    for name in args.nodes.split(","):
+        try:
+            alarms = _get_json(f"http://{args.parent}:{args.port}/host/{name}/api/v1/alarms", 5).get("alarms", {})
+        except urllib.error.HTTPError:
+            continue  # host not known to the parent: netdata-nodes reports that
+        for a in alarms.values():
+            if a.get("status") not in ("WARNING", "CRITICAL") or a.get("name") in args.ignore:
+                continue
+            what = a.get("summary") or a.get("name")
+            problems.append(f"{name}: {what} = {a.get('value_string')} ({a['status']}, {a.get('name')})")
+    return sorted(problems)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="mode", required=True)
@@ -572,6 +611,11 @@ def main():
     s = sub.add_parser("internet"); s.add_argument("--router", required=True); s.add_argument("--dish", required=True)
     s.add_argument("--dns", required=True); s.add_argument("--https-url", default="https://www.google.com/generate_204")
     s.set_defaults(fn=internet)
+    s = sub.add_parser("netdata-nodes"); s.add_argument("parent"); s.add_argument("--nodes", required=True)
+    s.add_argument("--port", type=int, default=19999); s.set_defaults(fn=netdata_nodes)
+    s = sub.add_parser("netdata-alerts"); s.add_argument("parent"); s.add_argument("--nodes", required=True)
+    s.add_argument("--ignore", action="append", default=[]); s.add_argument("--port", type=int, default=19999)
+    s.set_defaults(fn=netdata_alerts)
 
     args = p.parse_args()
     try:

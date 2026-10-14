@@ -52,6 +52,11 @@ Skycam Backup	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_hea
 Living Room Backup	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py backup --ssh apex-agent-livingroom ${LIVING_ROOM_IP}	warning
 Bedroom Backup	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py backup --ssh apex-agent-bedroom ${BEDROOM_LUNA_IP}	warning
 Jellyfin Backup	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py backup --ssh apex-agent-jellyfin ${JELLYFIN_IP}	warning
+# Netdata (2026-10-14): every Linux machine streams per-second metrics to a parent on the EPYC box.
+# Nodes = a machine stopped streaming (hung / rebooted / lost power); Alerts = SMART, ECC, PCIe, OOM, IPMI,
+# failed services, disk fill... raised there. See runbooks/netdata-alert.md.
+Netdata Nodes	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py netdata-nodes ${EPYC_LLM_IP} --nodes main-server,epyc,z4,living-room,bedroom,kitchen-jellyfin,skycam	warning
+Netdata Alerts	command	python3 /home/davids/ai-watchdog/scripts/watchdog_host_health.py netdata-alerts ${EPYC_LLM_IP} --nodes main-server,epyc,z4,living-room,bedroom,kitchen-jellyfin,skycam	warning
 Dashboard	http	http://127.0.0.1:8098/dashboard.html
 Frigate	http	http://${FRIGATE_HOST_IP}:5000/api/stats
 Voice Assistant	command	bash -lc 'docker inspect -f "{{.State.Running}}" nodered >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" parakeet-stt >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" kokoro-tts >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" cedalo_platform-mosquitto-1 >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" openwakeword-livingroom >/dev/null 2>&1 && docker inspect -f "{{.State.Running}}" openwakeword-bedroom >/dev/null 2>&1'	critical
