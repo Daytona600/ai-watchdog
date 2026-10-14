@@ -15,3 +15,4 @@ Manual recovery notes for common watchdog alerts.
 - Node-RED hard-coded address: node-hardcoded-address.html
 - Internet down (router / Starlink / DNS): internet-down.html
 - Netdata alert or machine not streaming: netdata-alert.html
+- AI fix assistant (analysis pages, Fix it with AI): ai-fix-assistant.html

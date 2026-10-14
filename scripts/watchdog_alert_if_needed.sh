@@ -15,6 +15,7 @@ WATCHDOG_NOTIFICATION_ID="ai_watchdog_attention"
 WATCHDOG_ALERT_ON_CHANGE_ONLY="1"
 
 [ -f "$ALERT_CONF" ] && source "$ALERT_CONF"
+[ -f "$BASE/config/watchdog_ai_fix.conf" ] && source "$BASE/config/watchdog_ai_fix.conf"
 
 ALERT_TXT="$STATE_DIR/current_attention.txt"
 INFO_TXT="$STATE_DIR/current_info.txt"
@@ -239,14 +240,16 @@ if [ -z "${HA_BASE_URL:-}" ] || [ -z "${HA_TOKEN:-}" ]; then
 fi
 
 PAYLOAD="$(
-  python3 - "$WATCHDOG_NOTIFICATION_ID" "$ATTENTION_TEXT" <<'PY'
+  python3 - "$WATCHDOG_NOTIFICATION_ID" "$ATTENTION_TEXT" "${AI_FIX_PUBLIC_BASE:-https://ha.magnumz.com/watchdog}" <<'PY'
 import json
 import sys
 
 print(json.dumps({
     "notification_id": sys.argv[1],
     "title": "AI Watchdog Attention Needed",
-    "message": sys.argv[2]
+    "message": sys.argv[2].rstrip() + f"
+
+[View AI analysis and fixes]({sys.argv[3].rstrip('/')}/fixes/index.html) (home network / VPN)"
 }))
 PY
 )"

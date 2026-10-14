@@ -21,3 +21,4 @@ state/
 .aider*
 __pycache__/
 *.pyc
+config/opencode_web.env

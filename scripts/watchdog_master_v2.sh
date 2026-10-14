@@ -41,7 +41,6 @@ run_and_capture "Backup Validation" "$BASE/scripts/watchdog_backup_validation_v1
 run_and_capture "HA Diff" "$BASE/scripts/watchdog_diff_v2.sh"
 run_and_capture "Main Server Diff" "$BASE/scripts/watchdog_server_diff_v2.sh"
 run_and_capture "Action Hints" "$BASE/scripts/watchdog_action_hints_v1.sh" "$REPORT"
-run_and_capture "AI Diagnose" "$BASE/scripts/watchdog_ai_diagnose_v1.py"
 run_and_capture "Publish Latest Report" "$BASE/scripts/watchdog_publish_latest.sh"
 run_and_capture "Publish Runbooks" "$BASE/scripts/watchdog_publish_runbooks_v1.sh"
 run_and_capture "Update Monitor" "$BASE/scripts/watchdog_update_monitor_v1.sh"
@@ -144,6 +143,9 @@ fi
 run_and_capture "Alert Check" "$BASE/scripts/watchdog_alert_if_needed.sh"
 run_and_capture "Dependency Map" "$BASE/scripts/watchdog_dependencies_v1.py"
 run_and_capture "Dashboard Page" "$BASE/scripts/watchdog_dashboard_v1.sh"
+# AI analysis of each dashboard problem by the LLM on the EPYC box (~1 min each), so it runs in the
+# background and re-renders the dashboard itself when done. Log: logs/ai-fix.log
+run_and_capture "AI Fix Assistant" "nohup python3 $BASE/scripts/watchdog_ai_fix.py >> $BASE/logs/ai-fix.log 2>&1 & echo started in background, log: logs/ai-fix.log"
 
 echo "## Retention Cleanup" >> "$REPORT"
 echo "" >> "$REPORT"

@@ -1,0 +1,14 @@
+[Unit]
+Description=AI Watchdog Local Web Report Server
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/davids/ai-watchdog/public
+# Serves public/ on :8098 and the AI fix-page buttons (was: python3 -m http.server 8098).
+ExecStart=/usr/bin/python3 /home/davids/ai-watchdog/scripts/watchdog_web.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

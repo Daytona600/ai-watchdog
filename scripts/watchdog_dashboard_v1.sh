@@ -87,6 +87,8 @@ alert = read_json(public / "alert.json", {})
 heartbeat = read_json(public / "watchdog-heartbeat.json", {})
 dependencies = read_json(public / "dependencies.json", {})
 hint_rules = load_hint_rules(base / "config" / "watchdog_action_hints.tsv")
+# AI analyses written by watchdog_ai_fix.py (keys: "svc:<check name>" / "alert:<problem line>").
+ai_fixes = read_json(public / "fixes" / "index.json", {}).get("items") or {}
 
 latest_master = newest("watchdog-master-*.md")
 latest_master_time = fmt_time_from_path(latest_master)
@@ -180,8 +182,21 @@ def status_badge(label, cls):
     return f'<span class="badge {cls}">{esc(label)}</span>'
 
 
+def ai_fix_links(key):
+    f = ai_fixes.get(key)
+    if not f or f.get("status") != "open":
+        return "", ""
+    href = f"fixes/{esc(f['id'])}.html"
+    if f.get("analysed"):
+        return (f'<a class="ai-chip" href="{href}" target="_blank" title="AI analysis and proposed fix">AI fix &rarr;</a>',
+                f'<p><a class="ai-link" href="{href}" target="_blank">Open the AI analysis and proposed fix &rarr;</a></p>')
+    return ('<span class="ai-chip pending">AI analysing</span>',
+            f'<p class="muted"><a href="{href}" target="_blank">AI analysis in progress</a></p>')
+
+
 def service_card(row):
     badge = status_badge(service_badge_label(row), service_badge_class(row))
+    ai_chip, ai_body = ai_fix_links(f"svc:{row['service']}") if row["status"] == "attention" else ("", "")
     detail_text = row.get("detail", "")
     hints = hints_for(f"{row['service']} {detail_text}", hint_rules) if row["status"] != "ok" else []
 
@@ -205,8 +220,9 @@ def service_card(row):
     <details class="card service-card sev-{service_badge_class(row)}">
       <summary>
         <span class="service-name">{esc(row['service'])}</span>
-        {badge}
+        <span>{ai_chip} {badge}</span>
       </summary>
+      {ai_body}
       {body}
       {''.join(extra)}
     </details>
@@ -220,9 +236,11 @@ def problem_item(p):
     else:
         hint_html = "<p class='muted'>No matching hint recorded for this problem yet.</p>"
     sev_cls = "bad" if p["severity"] == "critical" else "warn"
+    ai_chip, ai_body = ai_fix_links(f"alert:{p['text']}")
     return f"""
     <details class="problem sev-{sev_cls}">
-      <summary>{status_badge(SEVERITY_LABEL.get(p['severity'], 'WARNING'), sev_cls)} {esc(p['text'])}</summary>
+      <summary>{status_badge(SEVERITY_LABEL.get(p['severity'], 'WARNING'), sev_cls)} {esc(p['text'])} {ai_chip}</summary>
+      {ai_body}
       {hint_html}
     </details>
     """
@@ -372,6 +390,13 @@ html_doc = f"""<!doctype html>
       color: var(--text);
     }}
     .links a {{ display: block; margin: 5px 0; }}
+    .ai-chip {{
+      display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700;
+      background: #2f6fde; color: white; white-space: nowrap; margin-right: 4px;
+    }}
+    .ai-chip.pending {{ background: var(--unknown); }}
+    a.ai-chip:hover {{ text-decoration: none; filter: brightness(1.15); }}
+    .ai-link {{ font-weight: 600; }}
   </style>
 </head>
 <body>
@@ -416,6 +441,7 @@ html_doc = f"""<!doctype html>
     <a href="history.html">Watchdog history</a>
     <a href="brief.html">Morning brief</a>
     <a href="drill.html">Safe drill mode</a>
+    <a href="fixes/index.html">AI analyses and fixes</a>
     <a href="runbooks/index.html">Recovery runbooks</a>
     <a href="dashboard.json">Dashboard JSON</a>
     <a href="dependencies.json">Dependency JSON</a>
