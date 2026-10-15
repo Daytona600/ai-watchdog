@@ -22,6 +22,7 @@ Usage:
   watchdog_ai_fix.py                 analyse new problems (watchdog_master_v2.sh runs this)
   watchdog_ai_fix.py --reanalyse ID  process pending "ask for changes" requests (ID is informational)
   watchdog_ai_fix.py --render ID     re-render one page from its saved data (no LLM)
+  watchdog_ai_fix.py --publish-ha     re-publish sensor.ai_watchdog_problems to HA if HA's copy differs (every 2 min)
   watchdog_ai_fix.py --recheck ID    re-run that problem's dashboard check now (the fixer uses this to verify)
   watchdog_ai_fix.py --dry-run       list the problems and the evidence that would be sent
 """
@@ -611,6 +612,50 @@ def notify(state):
         print(f"HA notification failed: {e}")
 
 
+HA_SENSOR = "sensor.ai_watchdog_problems"
+
+
+def publish_ha_sensor(state):
+    """Mirror the open problems into an HA sensor for the card on the AI Watchdog view.
+
+    HA forgets states set through the API when it restarts, so ai-watchdog-internet.service
+    calls this every 2 minutes (--publish-ha); it only writes when HA's copy differs."""
+    ha = load_env(HA_ENV)
+    base_url, token = ha.get("HA_BASE_URL", "").rstrip("/"), ha.get("HA_TOKEN", "")
+    if not base_url or not token:
+        return
+    link = conf("AI_FIX_PUBLIC_BASE", "https://ha.magnumz.com/watchdog").rstrip("/")
+    items = []
+    for s in sorted((s for s in state.values() if s.get("status") == "open"),
+                    key=lambda s: (SEV_ORDER.get(s.get("severity"), 1), s.get("first_seen", ""))):
+        a = (read_json(FIXES / f"{s['id']}.json", {}).get("latest") or {}).get("analysis") or {}
+        items.append({"name": s["name"], "severity": s.get("severity", "warning"),
+                      "summary": a.get("summary") or "AI analysis in progress",
+                      "confidence": a.get("confidence", ""), "url": f"{link}/fixes/{s['id']}.html"})
+    attributes = {"friendly_name": "AI Watchdog problems", "icon": "mdi:robot-confused-outline" if items else "mdi:robot-happy-outline",
+                  "unit_of_measurement": "problems", "items": items, "index_url": f"{link}/fixes/index.html"}
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    try:
+        with urllib.request.urlopen(urllib.request.Request(f"{base_url}/api/states/{HA_SENSOR}", headers=headers), timeout=10) as r:
+            cur = json.load(r)
+        if cur.get("state") == str(len(items)) and cur.get("attributes", {}).get("items") == items:
+            return
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            print(f"HA sensor read failed: HTTP {e.code}")
+            return
+    except Exception as e:
+        print(f"HA sensor read failed: {e}")
+        return
+    try:
+        urllib.request.urlopen(urllib.request.Request(f"{base_url}/api/states/{HA_SENSOR}",
+                                                      json.dumps({"state": str(len(items)), "attributes": attributes}).encode(),
+                                                      headers, method="POST"), timeout=10).read()
+        print(f"{HA_SENSOR} = {len(items)}")
+    except Exception as e:
+        print(f"HA sensor update failed: {e}")
+
+
 # ---------------------------------------------------------------- runs
 
 def save_analysis(fid, item, result, state_entry):
@@ -699,6 +744,7 @@ def main_run(max_items, only_requests=False):
     write_json(STATE_FILE, state)
     render_index(state)
     notify(state)
+    publish_ha_sensor(state)
     refresh_dashboard()
     print(f"done: {done} analysis(es), {sum(1 for s in state.values() if s.get('status') == 'open')} open")
 
@@ -708,10 +754,14 @@ def main():
     p.add_argument("--reanalyse", metavar="ID")
     p.add_argument("--render", metavar="ID")
     p.add_argument("--recheck", metavar="ID")
+    p.add_argument("--publish-ha", action="store_true")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--max", type=int, default=int(conf("AI_FIX_MAX_PER_RUN", "6")))
     args = p.parse_args()
 
+    if args.publish_ha:
+        publish_ha_sensor(read_json(STATE_FILE, {}))
+        return 0
     if args.render:
         render_page(args.render)
         return 0

@@ -3,5 +3,6 @@ Description=AI Watchdog internet check (router / Starlink / DNS) for the dashboa
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'python3 /home/davids/ai-watchdog/scripts/watchdog_dependencies_v1.py --only Internet >/dev/null && /home/davids/ai-watchdog/scripts/watchdog_dashboard_v1.sh >/dev/null'
+# Also re-publishes sensor.ai_watchdog_problems for the HA card (HA drops API-set states on restart).
+ExecStart=/bin/bash -c 'python3 /home/davids/ai-watchdog/scripts/watchdog_dependencies_v1.py --only Internet >/dev/null && /home/davids/ai-watchdog/scripts/watchdog_dashboard_v1.sh >/dev/null; python3 /home/davids/ai-watchdog/scripts/watchdog_ai_fix.py --publish-ha >/dev/null'
 TimeoutStartSec=60
