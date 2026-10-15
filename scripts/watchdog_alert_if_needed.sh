@@ -240,16 +240,16 @@ if [ -z "${HA_BASE_URL:-}" ] || [ -z "${HA_TOKEN:-}" ]; then
 fi
 
 PAYLOAD="$(
-  python3 - "$WATCHDOG_NOTIFICATION_ID" "$ATTENTION_TEXT" "${AI_FIX_PUBLIC_BASE:-https://ha.magnumz.com/watchdog}" <<'PY'
+  python3 - "$WATCHDOG_NOTIFICATION_ID" "$ATTENTION_TEXT" "${AI_FIX_HA_VIEW:-/home-v2/ai-watchdog}" <<'PY'
 import json
 import sys
 
+# Link to the HA view, not /watchdog/: HA treats links in a notification as its own pages.
+link = f"**[Open AI Watchdog in Home Assistant]({sys.argv[3]})** for the AI analysis and fix of each problem."
 print(json.dumps({
     "notification_id": sys.argv[1],
     "title": "AI Watchdog Attention Needed",
-    "message": sys.argv[2].rstrip() + f"
-
-[View AI analysis and fixes]({sys.argv[3].rstrip('/')}/fixes/index.html) (home network / VPN)"
+    "message": sys.argv[2].rstrip() + "\n\n" + link
 }))
 PY
 )"

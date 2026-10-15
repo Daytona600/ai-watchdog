@@ -591,19 +591,22 @@ def notify(state):
         print("HA_BASE_URL/HA_TOKEN missing; no notification")
         return
     nid = conf("AI_FIX_NOTIFICATION_ID", "ai_watchdog_fixes")
-    link = conf("AI_FIX_PUBLIC_BASE", "https://ha.magnumz.com/watchdog").rstrip("/")
+    # HA treats links in a notification as its own pages (a /watchdog/ link fell through to the
+    # first dashboard), so link to the HA view whose card has the per-problem links.
+    view = conf("AI_FIX_HA_VIEW", "/home-v2/ai-watchdog")
     open_items = [s for s in state.values() if s.get("status") == "open" and s.get("analysed_at")]
     lines = []
     for s in sorted(open_items, key=lambda s: SEV_ORDER.get(s.get("severity"), 1)):
         a = (read_json(FIXES / f"{s['id']}.json", {}).get("latest") or {}).get("analysis") or {}
-        lines.append(f"- **{s['name']}**: {shorten(a.get('summary', ''), 220)} [View analysis and fix]({link}/fixes/{s['id']}.html)")
+        lines.append(f"- **{s['name']}**: {shorten(a.get('summary', ''), 220)}")
     digest = hashlib.sha1("\n".join(lines).encode()).hexdigest()
     marker = STATE_DIR / "last_notification.sha1"
     if marker.exists() and marker.read_text().strip() == digest:
         return
     if lines:
         service, payload = "create", {"notification_id": nid, "title": f"AI Watchdog: {len(lines)} problem(s) analysed",
-                                      "message": "\n".join(lines) + f"\n\n[All AI analyses]({link}/fixes/index.html) (home network / VPN only)"}
+                                      "message": "\n".join(lines) + f"\n\n**[Open AI Watchdog in Home Assistant]({view})** "
+                                                 "for each analysis and its Fix-it button."}
     else:
         service, payload = "dismiss", {"notification_id": nid}
     req = urllib.request.Request(f"{base_url}/api/services/persistent_notification/{service}",
