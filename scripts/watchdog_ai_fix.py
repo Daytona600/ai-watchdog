@@ -117,6 +117,11 @@ def write_text(path: Path, text: str):
     tmp.replace(path)
 
 
+def shorten(text: str, limit: int) -> str:
+    """Cut at a word boundary with an ellipsis, so notifications don't end mid-word."""
+    return text if len(text) <= limit else text[:limit].rsplit(" ", 1)[0].rstrip(",;:") + "..."
+
+
 def item_id(key: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", key.lower()).strip("-")[:48].strip("-")
     return f"{slug}-{hashlib.sha1(key.encode()).hexdigest()[:6]}"
@@ -591,7 +596,7 @@ def notify(state):
     lines = []
     for s in sorted(open_items, key=lambda s: SEV_ORDER.get(s.get("severity"), 1)):
         a = (read_json(FIXES / f"{s['id']}.json", {}).get("latest") or {}).get("analysis") or {}
-        lines.append(f"- **{s['name']}**: {a.get('summary', '')[:220]} [View analysis and fix]({link}/fixes/{s['id']}.html)")
+        lines.append(f"- **{s['name']}**: {shorten(a.get('summary', ''), 220)} [View analysis and fix]({link}/fixes/{s['id']}.html)")
     digest = hashlib.sha1("\n".join(lines).encode()).hexdigest()
     marker = STATE_DIR / "last_notification.sha1"
     if marker.exists() and marker.read_text().strip() == digest:
