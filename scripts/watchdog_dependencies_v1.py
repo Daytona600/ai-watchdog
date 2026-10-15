@@ -134,6 +134,10 @@ for row in read_tsv(CHECKS):
     if ONLY:
         checks[name]["checked"] = datetime.now().astimezone().isoformat(timespec="seconds")
 
+# Every check gets a card, not only the services named in the dependency map (16 of 59 checks -
+# Netdata, backups, Internet... - were counted in the summary but had no card to click).
+services |= set(checks)
+
 service_rows = []
 for service in sorted(services):
     direct_deps = [d for d in deps if d["service"] == service]
