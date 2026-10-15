@@ -174,6 +174,9 @@ def current_items():
 
 # ---------------------------------------------------------------- evidence
 
+CONTAINER_FMT = ("{{.Names}} | {{.Status}} | {{.Ports}} | "
+                 "{{.Label \"com.docker.compose.project.working_dir\"}} {{.Label \"com.docker.compose.service\"}}")
+
 HOST_OVERVIEW = ("hostname; uptime; df -h / | tail -1; free -h | head -2; "
                  "echo '--- failed units'; systemctl --failed --no-legend --plain | head -10; "
                  "echo '--- stopped/restarting containers'; "
@@ -207,12 +210,19 @@ def evidence_for(item):
     if t == "container":
         fmt = ("status={{.State.Status}} restarts={{.RestartCount}} started={{.State.StartedAt}} "
                "finished={{.State.FinishedAt}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} "
-               "health={{if .State.Health}}{{.State.Health.Status}}{{end}}")
+               "health={{if .State.Health}}{{.State.Health.Status}}{{end}} "
+               "compose_dir={{index .Config.Labels \"com.docker.compose.project.working_dir\"}} "
+               "compose_service={{index .Config.Labels \"com.docker.compose.service\"}}")
         ev.append(("docker inspect (main server)", run(["docker", "inspect", "-f", fmt, target])))
         ev.append((f"docker logs --tail 60 {target}", run(["docker", "logs", "--tail", "60", target])))
     elif t == "http":
         ev.append(("HTTP probe", run(["curl", "-sS", "-o", "/dev/null", "-m", "8", "-w",
                                       "HTTP %{http_code} in %{time_total}s\n", target], timeout=12)))
+        u = urllib.parse.urlparse(target)
+        if u.hostname in ("127.0.0.1", "localhost", watchdog_hosts.get("MAIN_SERVER_IP")):
+            port = u.port or (443 if u.scheme == "https" else 80)
+            ev.append((f"is anything listening on port {port} (main server)", run(["bash", "-c", f"ss -ltn | grep -w ':{port}' || echo 'nothing listening on {port}'"])))
+            ev.append(("containers on the main server (name, status, ports, compose dir)", run(["docker", "ps", "-a", "--format", CONTAINER_FMT])))
     elif t == "systemd-user-timer":
         ev.append(("systemctl --user status", run(["systemctl", "--user", "status", target, "--no-pager", "-n", "20"])))
         svc = re.sub(r"\.timer$", ".service", target)
@@ -288,7 +298,9 @@ SYSTEM_PROMPT = """You are the on-call engineer for a home lab. A monitoring che
 
 Rules:
 - Base every claim on the evidence. If the evidence does not settle the cause, say so, use confidence "low", and make the first steps "inspect" commands that would settle it.
-- Each step: a complete, copy-pasteable command, run on the named host (from the main server use the ssh alias, e.g. ssh apex-agent-z4 '...'). Do not invent file paths, container names or units that the evidence or the house description does not mention; when unsure, inspect first.
+- Each step: a complete, copy-pasteable command, run on the named host (from the main server use the ssh alias, e.g. ssh apex-agent-z4 '...').
+- Use only directory paths, container names, compose services and units that appear in the evidence or the house description. If a fix needs one the evidence does not show (for example a compose directory), the step before it must look it up (e.g. docker inspect -f '{{index .Config.Labels "com.docker.compose.project.working_dir"}}' NAME), and the fix step must refer to that result instead of a guessed path.
+- confidence "high" only when the evidence directly shows the cause (e.g. a log line, an exit code, a missing mount). A plausible guess is "medium" at best.
 - kind: "inspect" = read-only; "change" = edits a config or restarts one service; "disruptive" = reboots a host, deletes data, or interrupts the whole house; "manual" = needs a person (hardware, cables, power, a UI click).
 - Order: inspect first, then the fix, then nothing else. Keep it short: at most 8 steps.
 - Never include secrets or commands that print them.
@@ -594,7 +606,7 @@ def notify(state):
     try:
         urllib.request.urlopen(req, timeout=15).read()
         marker.write_text(digest)
-        print(f"HA notification {service}d ({len(lines)} open)")
+        print(f"HA notification {'updated' if lines else 'dismissed'} ({len(lines)} open)")
     except Exception as e:
         print(f"HA notification failed: {e}")
 

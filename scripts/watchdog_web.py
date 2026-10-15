@@ -33,7 +33,7 @@ BASE = Path(os.environ.get("WATCHDOG_BASE", str(Path.home() / "ai-watchdog")))
 sys.path.insert(0, str(BASE / "scripts"))
 import watchdog_ai_fix as fix  # noqa: E402
 
-PORT = 8098
+PORT = int(os.environ.get("WATCHDOG_WEB_PORT", "8098"))
 OPENCODE_ENV = BASE / "config" / "opencode_web.env"
 ALLOWED_ORIGINS = {"ha.magnumz.com", f"{fix.watchdog_hosts.get('MAIN_SERVER_IP')}:{PORT}",
                    f"localhost:{PORT}", f"127.0.0.1:{PORT}"}
@@ -67,6 +67,12 @@ def fixer_prompt(doc):
              f"Check output: {item['detail']}"]
     if item.get("type") and item.get("target"):
         lines.append(f"The check: type {item['type']}, target: {item['target']}")
+    if doc["key"].startswith("svc:"):
+        lines.append(f"It is the row named \"{doc['key'][4:]}\" in ~/ai-watchdog/config/watchdog_dependency_checks.tsv on the "
+                     "main server (${VAR} placeholders come from config/watchdog_known_hosts.conf); the check modes live in "
+                     "scripts/watchdog_host_health.py. If the check itself is wrong, fixing that row is the fix.")
+    else:
+        lines.append("It is an attention line from the full watchdog report (~/ai-watchdog/reports/watchdog-master-*.md on the main server).")
     if a:
         lines += ["", f"First-pass analysis ({latest.get('model')}, confidence {a['confidence']}):",
                   f"Summary: {a['summary']}", f"Likely cause: {a['likely_cause']}"]
