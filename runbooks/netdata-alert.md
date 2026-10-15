@@ -29,6 +29,7 @@ Two dashboard rows come from Netdata:
 
 - A one-off that is understood: add `--ignore <alert name>` to the Netdata Alerts row in config/watchdog_dependency_checks.tsv.
 - A rule that is wrong for this house: edit /etc/netdata/health.d/home.conf on the EPYC box, then `sudo netdatacli reload-health`.
+- Changes already made: `/etc/netdata/health.d/disks.conf` on the EPYC is a copy of the stock file whose `10min_disk_backlog` skips md RAID arrays (`chart labels: device=!md* *`). The kernel's queue-time figure for an md array balloons whenever its disks are briefly busy (md1 read 740 s during a ~30 IOPS burst on 2026-10-14), so it warned about a healthy array. The real disks (sdb-sde) still have the alert; RAID health comes from the mdstat_* alerts and the Z4 RAID rows. To undo: `sudo rm /etc/netdata/health.d/disks.conf && sudo netdatacli reload-health`.
 - A filesystem that should never be checked: add it to `exclude space metrics on paths` in that machine's /etc/netdata/netdata.conf (Pop!_OS's /recovery is already excluded).
 
 ## Layout
