@@ -48,6 +48,18 @@ const CHECKS: Record<string, { cmd: string; needsTarget?: boolean; help: string 
     needsTarget: true,
     help: "GET a URL from that host and report the HTTP status (target = http://host:port/path)",
   },
+  // Home Assistant: always run on the main server, which holds the HA token. Calling HA's API from
+  // anywhere without a token gets that machine's IP banned (EPYC, 2026-10-14).
+  ha_state: {
+    cmd: "set -a; . ~/ai-watchdog/config/ha_token.env; set +a; curl -sS -m 10 -H \"Authorization: Bearer $HA_TOKEN\" \"$HA_BASE_URL/api/states/\"{T}",
+    needsTarget: true,
+    help: "Home Assistant entity state + attributes (target = entity_id, e.g. light.kitchen); runs on the main server",
+  },
+  ha_find: {
+    cmd: "set -a; . ~/ai-watchdog/config/ha_token.env; set +a; curl -sS -m 10 -H \"Authorization: Bearer $HA_TOKEN\" \"$HA_BASE_URL/api/states\" | python3 -c \"import json,sys; [print(s['entity_id'], '=', s['state']) for s in json.load(sys.stdin) if sys.argv[1] in s['entity_id']]\" {T}",
+    needsTarget: true,
+    help: "Home Assistant entities whose id contains target, with state; runs on the main server",
+  },
   cron: { cmd: "crontab -l 2>/dev/null; ls /etc/cron.d; systemctl list-timers --all --no-pager | head -40", help: "cron jobs and timers" },
 }
 
@@ -63,6 +75,7 @@ export default tool({
     lines: tool.schema.number().optional().describe("Line count for logs (default 80, max 400)"),
   },
   async execute(args) {
+    if (args.check === "ha_state" || args.check === "ha_find") args.host = "apex-agent-server"
     if (!HOSTS.includes(args.host)) return `Error: unknown host "${args.host}". Valid: ${HOSTS.join(", ")}`
     const c = CHECKS[args.check]
     if (!c) return `Error: unknown check "${args.check}". Valid: ${Object.keys(CHECKS).join(", ")}`
