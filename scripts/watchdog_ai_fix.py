@@ -639,7 +639,9 @@ def publish_ha_sensor(state):
         a = (read_json(FIXES / f"{s['id']}.json", {}).get("latest") or {}).get("analysis") or {}
         items.append({"name": s["name"], "severity": s.get("severity", "warning"),
                       "summary": a.get("summary") or "AI analysis in progress",
-                      "confidence": a.get("confidence", ""), "url": f"{link}/fixes/{s['id']}.html"})
+                      # no page exists until the analysis finishes; link the index meanwhile, not a 404
+                      "confidence": a.get("confidence", ""),
+                      "url": f"{link}/fixes/{s['id']}.html" if a else f"{link}/fixes/index.html"})
     attributes = {"friendly_name": "AI Watchdog problems", "icon": "mdi:robot-confused-outline" if items else "mdi:robot-happy-outline",
                   "unit_of_measurement": "problems", "items": items, "index_url": f"{link}/fixes/index.html"}
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}

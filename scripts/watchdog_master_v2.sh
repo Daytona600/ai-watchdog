@@ -145,7 +145,9 @@ run_and_capture "Dependency Map" "$BASE/scripts/watchdog_dependencies_v1.py"
 run_and_capture "Dashboard Page" "$BASE/scripts/watchdog_dashboard_v1.sh"
 # AI analysis of each dashboard problem by the LLM on the EPYC box (~1 min each), so it runs in the
 # background and re-renders the dashboard itself when done. Log: logs/ai-fix.log
-run_and_capture "AI Fix Assistant" "nohup python3 $BASE/scripts/watchdog_ai_fix.py >> $BASE/logs/ai-fix.log 2>&1 & echo started in background, log: logs/ai-fix.log"
+# ai-watchdog.service is a oneshot: when this script exits systemd kills everything left in its
+# cgroup, nohup or not, so the analysis runs as its own transient user service.
+run_and_capture "AI Fix Assistant" "systemd-run --user --no-block --quiet --collect --unit=ai-watchdog-ai-fix-\$(date +%s) -p StandardOutput=append:$BASE/logs/ai-fix.log -p StandardError=append:$BASE/logs/ai-fix.log python3 $BASE/scripts/watchdog_ai_fix.py && echo started as a user service, log: logs/ai-fix.log"
 
 echo "## Retention Cleanup" >> "$REPORT"
 echo "" >> "$REPORT"
