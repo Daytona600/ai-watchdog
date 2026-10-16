@@ -260,9 +260,8 @@ for cam in expected:
             row["problems"].append("process_fps is 0")
 
         if row["camera_fps"] == 0 and row["process_fps"] == 0:
-            if camera_zero_allowed:
-                add_attention(f"Frigate camera may be stalled: {cam} has camera_fps=0 and process_fps=0 even though camera_fps zero is allowed")
-            else:
+            # an allowed camera (e.g. solar, switched on only on motion) is simply idle
+            if not camera_zero_allowed:
                 add_attention(f"Frigate camera appears stalled: {cam} has camera_fps=0 and process_fps=0")
         elif row["camera_fps"] == 0:
             if not camera_zero_allowed:
